@@ -1,0 +1,417 @@
+{#
+Appiaries Push Notifications EC-CUBE 3 Plugin v1.0.0
+melissa always loves you!
+Copyright (c) 2015 Appiaries Co.
+Under the terms of the MIT license.
+http://www.appiaries.com/
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#}
+
+{% extends 'default_frame.twig' %}
+
+{% set menus = ['appiaries', 'push_add', ''] %}
+
+{% block title %}プッシュ配信管理{% endblock %}
+{% block sub_title %}配信予約{% endblock %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="{{ app.config.admin_urlpath }}/assets/css/bootstrap-datetimepicker.min.css">
+<style>
+.bold {
+  font-weight: bold;
+}
+.larger {
+  font-size: 120%;
+}
+.red {
+  color: #df0000;
+}
+.note {
+  font-size: 75%;
+  color: #505050;
+  font-weight: normal;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script src="{{ app.config.admin_urlpath }}/assets/js/vendor/moment.min.js"></script>
+<script src="{{ app.config.admin_urlpath }}/assets/js/vendor/moment-ja.js"></script>
+<script src="{{ app.config.admin_urlpath }}/assets/js/vendor/bootstrap-datetimepicker.min.js"></script>
+<script>
+$('#btn_back').on('click', function(){ history.back(-1); });
+$('#btn_next').on('click', function(){
+	$('#add_reserve_form').submit();
+});
+$('#appiaries_push_delivery_date').datetimepicker({
+	locale: 'ja',
+	format: 'YYYY-MM-DD HH:mm',
+	useCurrent: false,
+	showTodayButton: true
+});
+$(document).ready(function(){
+	var delivery_default = $('#hidden_delivery_default').length ? $('#hidden_delivery_default').html() : null;
+	if (delivery_default && $('#appiaries_push_delivery_date').length) {
+		$('#appiaries_push_delivery_date').val(delivery_default);
+		delivery_default = void 0;
+	}
+});
+</script>
+{% endblock javascript %}
+
+{# BEGIN: main #}
+{% block main %}
+
+	{% if delivery_date_default is defined %}
+<div id="hidden_delivery_default" style="display:none;">{{ delivery_date_default }}</div>
+	{% endif %}
+
+<div id="aside_wrap" class="row">
+
+	{# BEGIN: if mode is defined #}
+	{% if mode is defined %}
+
+	<!-- BEGIN: Appiaries Push Add Form -->
+	<form id="add_reserve_form" method="POST"
+		action="{{ url('admin_appiaries_push_add_reserve') }}"
+		role="form" class="form-horizontal">
+
+		{# Will automatically insert the EC-CUBE session token #}
+	{{ form_widget(add_reserve_form._token) }}
+
+		{# To distinguish which steps currently working on. #}
+	{{ form_widget(add_reserve_form.mode, {'value' : mode ~ "", 'attr': { 'type': 'hidden' }}) }}
+
+
+	<!-- BEGIN: Left Side Content -->
+	<div class="col-md-9">
+		<div class="box">
+			<div class="box-header">
+		{% if mode == 'from_the_search' or mode == 'compose_message' %}
+				<h3 class="box-title">配信予約 (2/4) メッセージ作成</h3>
+				<p>配信するプッシュ通知の内容を作成します。</p>
+		{% elseif mode == 'reserve_push_delivery' %}
+				<h3 class="box-title">配信予約 (3/4) 日時設定</h3>
+				<p>配信を希望する日時を設定します。</p>
+		{% elseif mode == 'confirm_reservation' %}
+				<h3 class="box-title">配信予約 (4/4) 内容確認</h3>
+				<p>配信の内容を最終確認します。</p>
+		{% elseif mode == 'done' %}
+			{% if error is defined %}
+				<h3 class="box-title">予約エラー</h3>
+				<p>プッシュ配信の予約に失敗しました。</p>
+			{% else %}
+				<h3 class="box-title">予約完了</h3>
+				<p>プッシュ配信の予約が完了しました。</p>
+			{% endif %}
+		{% endif %}
+			</div>
+			<div class="box-body">
+				<div class="form-horizontal">
+
+		{# BEGIN: Show form entries for each mode #}
+
+		{% if mode == 'from_the_search' or mode == 'compose_message' %}
+					<!-- ********************************************** -->
+
+					<!-- BEGIN: FORM FOR MESSAGE COMPOSITION -->
+
+					<!-- PUSH_RESERVE_TITLE -->
+					<div class="form-group">
+						<div class="col-md-3 col-lg-3 control-label">
+<span class="bold">{{ add_reserve_form.push_reserve_title.vars.label }}</span>
+<div class="note">
+この配信予約を <span class="bold larger">管理画面で管理</span> いただくためのタイトルです。<br />
+<div class="red">※32文字以内</div>
+</div>
+						</div>
+						<div class="col-md-7 col-lg-7 input_name form-inline">
+							{{ form_widget(
+								add_reserve_form.push_reserve_title,
+								{ 'value' : push_reserve_title }
+							) }}
+						</div>
+						<div class="col-md-2 col-lg-2">
+							{{ form_errors(add_reserve_form.push_reserve_title) }}
+						</div>
+					</div>
+
+			{% if os == 'android' %}
+					<!-- TITLE -->
+					<div class="form-group">
+						<div class="col-md-3 col-lg-3 control-label">
+<span class="bold">{{ add_reserve_form.title.vars.label }}</span>
+<div class="note">
+配信されるプッシュ通知の <span class="bold larger">タイトルとしてユーザに表示</span> されます。
+<div class="red">※32文字以内</div>
+</div>
+						</div>
+						<div class="col-md-7 col-lg-7 input_name form-inline">
+							{{ form_widget(
+								add_reserve_form.title, {'value' : title}
+							) }}
+						</div>
+						<div class="col-md-2 col-lg-2">
+							{{ form_errors(add_reserve_form.title) }}
+						</div>
+					</div>
+
+			{% elseif os == 'ios' %}
+
+
+					<!-- SOUND -->
+					<div class="form-group">
+						<div class="col-md-3 col-lg-3 control-label">
+<span class="bold">{{ add_reserve_form.sound.vars.label }}</span>
+<div class="note">
+通知されたときに鳴らすサウンドの保存された端末のローカルパスを指定します。
+</div>
+						</div>
+						<div class="col-md-7 col-lg-7 input_name form-inline">
+							{{ form_widget(
+								add_reserve_form.sound, {'value' : sound}
+							) }}
+						</div>
+						<div class="col-md-2 col-lg-2">
+							{{ form_errors(add_reserve_form.sound) }}
+						</div>
+					</div>
+
+					<!-- BADGE -->
+					<div class="form-group">
+						<div class="col-md-3 col-lg-3 control-label">
+<span class="bold">{{ add_reserve_form.badge.vars.label }}</span>
+<div class="note">
+アプリアイコンの右肩に表示される数字です。
+<div class="red">※1以上の数字</div>
+</div>
+						</div>
+						<div class="col-md-2 col-lg-2 input_name form-inline">
+							{{ form_widget(
+								add_reserve_form.badge, {'value' : badge}
+							) }}
+						</div>
+						<div class="col-md-7 col-lg-7">
+							{{ form_errors(add_reserve_form.badge) }}
+						</div>
+					</div>
+
+
+			{% endif %}
+
+					<!-- MESSAGE -->
+					<div class="form-group">
+						<div class="col-md-3 col-lg-3 control-label">
+<span class="bold">{{ add_reserve_form.message.vars.label }}</span>
+<div class="note">
+配信されるプッシュ通知の <span class="bold larger">メッセージとしてユーザに表示</span> されます。
+<div class="red">※240文字以内</div>
+</div>
+						</div>
+						<div class="col-md-7 col-lg-7 input_name form-inline">
+							{{ form_widget(
+								add_reserve_form.message,
+								{
+									'value' : message,
+									'attr': { 'rows': 8, 'cols': 50 }
+								}
+						) }}
+						</div>
+						<div class="col-md-2 col-lg-2">
+							{{ form_errors(add_reserve_form.message) }}
+						</div>
+					</div>
+
+
+					<!-- RICH PUSH URL -->
+					<div class="form-group">
+						<div class="col-md-3 col-lg-3 control-label">
+<span class="bold">{{ add_reserve_form.rich_push.vars.label }}</span>
+<div class="note">
+通知から特定のウェブサイトを開くときのURLを指定します。
+<div class="red">※URL形式<br />※アプリ側でリッチプッシュ対応機能が実装されていることが前提です。</div>
+</div>
+						</div>
+						<div class="col-md-7 col-lg-7 input_name form-inline">
+							{{ form_widget(
+								add_reserve_form.rich_push, {'value' : rich_push}
+							) }}
+						</div>
+						<div class="col-md-2 col-lg-2">
+							{{ form_errors(add_reserve_form.rich_push) }}
+						</div>
+					</div>
+
+
+
+					<!-- END OF: FORM FOR MESSAGE COMPOSITION -->
+
+		{% elseif mode == 'reserve_push_delivery' %}
+
+					<!-- ********************************************** -->
+					<!-- BEGIN: FORM FOR PUSH DELIVERY RESERVATION -->
+
+					<!-- DELIVERY DATETIME -->
+					<div class="form-group">
+						{#
+						{{ form_row(add_reserve_form.delivery_date) }}
+						#}
+						<div class="col-md-3 col-lg-3 control-label">
+<span class="bold">{{ add_reserve_form.delivery_date.vars.label }}</span>
+<div class="note">
+<div class="red">※現在時刻より前は指定できません</div>
+<div class="red">※本日から一ヶ月以降は指定できません</div>
+</div>
+						</div>
+						<div class="col-md-7 col-lg-7 input_name form-inline">
+{{ form_widget(add_reserve_form.delivery_date, { 'value' : delivery_date }) }}
+						</div>
+						<div class="col-md-2 col-lg-2">
+{{ form_errors(add_reserve_form.delivery_date) }}
+						</div>
+					</div>
+					<!-- END OF: FORM FOR PUSH DELIVERY RESERVATION -->
+
+
+		{% elseif mode == 'confirm_reservation' %}
+
+					<!-- ********************************************** -->
+					<!-- BEGIN: FORM FOR CONFIRMATION -->
+
+			{% if check_list is defined %}
+				{% for chk in check_list  %}
+					<div class="form-group">
+{% if chk.key is defined and chk.label is defined and chk.value is defined %}
+	{% if chk.key == 'push_reserve_title'%}
+		{% set push_reserve_title = chk.value %}
+	{% endif %}
+<div class="col-md-2 col-lg-2{% if chk.key == 'delivery_count' %} bold{% endif %}">
+{{ chk.label }}
+</div>
+<div class="col-md-10 col-lg-10{% if chk.key == 'delivery_count' %} bold{% endif %}">
+	{% if chk.key == 'job' or chk.key == 'message' %}
+{{ chk.value | nl2br }}
+	{% else %}
+{{ chk.value }}
+	{% endif %}
+</div>
+{% endif %}
+					</div>
+				{% endfor %}
+
+				{% if exceeds_push_api_request_max is defined %}
+					<div class="form-group">
+						<div class="col-md-2 col-lg-2"></div>
+						<div class="col-md-10 col-lg-10 note">
+<span class="red">※※※ 注意 ※※※<br />
+この配信予約は一度に予約できる API リクエストの上限である 1000 件を超えているため、<br
+	/><span class="bold larger">1000 件 ごとに分割されて配信予約されますのでご注意ください。</span><br
+	/>またこれにより{%
+	if push_reserve_title is defined %}「{{ push_reserve_title }}」という配信予約タイトルは<br
+		/>「{{ push_reserve_title }} (1)」<br
+		/>「{{ push_reserve_title }} (2)」<br
+		/>「{{ push_reserve_title }} (3)」<br
+		/>「{{ push_reserve_title }} (4)」{%
+	else %}例えば「夏休み用プッシュ配信 2016-08-25」という配信予約タイトルは<br
+		/>「夏休み用プッシュ配信 2016-08-25 (1)」<br
+		/>「夏休み用プッシュ配信 2016-08-25 (2)」<br
+		/>「夏休み用プッシュ配信 2016-08-25 (3)」<br
+		/>「夏休み用プッシュ配信 2016-08-25 (4)」{%
+	endif %}<br
+		/>・・・・・のように<br
+		/>配信予約のタイトルの最後に括弧で括られた数字が<span
+		/>自動で付加されますのでご了承ください。
+</span>
+						</div>
+					</div>
+				{% endif %}
+			{% endif %}
+					<!-- END OF: FORM FOR CONFIRMATION -->
+
+
+		{% endif %}
+		{# END OF: Show form entries for each mode #}
+
+				</div>
+				<div style="display:none;">
+					{{ form_rest(add_reserve_form) }}
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END OF: Left Side Content -->
+
+
+	<!-- BEGIN: Right Side Content -->
+	<div id="aside_column" class="col-md-3">
+	</div>
+	<!-- END OF: Right Side Content -->
+
+	</form>
+	<!-- END OF: Appiaries Settings Form -->
+
+	{% endif %}
+	{# END OF: if mode is defined #}
+
+</div>
+
+
+<!-- BEGIN: footer -->
+<div class="col-md-12 col-lg-12">
+		<div class="box">
+			<div class="row col-md-12 col-lg-12" style="padding: 20px 0px 20px;">
+	{% if mode == 'done' %}
+		{% if error is defined %}
+				<div class="col-md-3 col-lg-3"></div>
+				<div class="col-md-3 col-lg-3">
+				<button id="btn_back"
+					class="btn btn-primary btn-block btn-lg">戻る</button>
+				</div>
+				<div class="col-md-6 col-lg-6"></div>
+		{% else %}
+				<div class="col-md-2 col-lg-2"></div>
+				<div class="col-md-3 col-lg-3">
+					<a href="{{ path('admin_appiaries_push_list') }}"
+						class="btn btn-primary btn-block btn-lg">予約配信一覧へ</a>
+				</div>
+				<div class="col-md-3 col-lg-3">
+					<a href="{{ url('admin_appiaries_push_add_search') }}"
+							class="btn btn-primary btn-block btn-lg">新しく予約する</a>
+				</div>
+				<div class="col-md-4 col-lg-4"></div>
+		{% endif %}
+	{% else %}
+				<div class="col-md-2 col-lg-2"></div>
+				<div class="col-md-2 col-lg-2">
+					<button id="btn_back"
+						class="btn btn-primary btn-block btn-lg">戻る</button>
+			        </div>
+				<div class="col-md-3 col-lg-3">
+					<button id="btn_next"
+						class="btn btn-primary btn-block btn-lg">
+		{% if mode == 'from_the_search' or mode == 'compose_message' %}
+予約日時を設定する
+		{% elseif mode == 'reserve_push_delivery' %}
+配信内容を確認する
+		{% elseif mode == 'confirm_reservation' %}
+配信を確定する
+		{% endif %}
+					</button>
+			        </div>
+				<div class="col-md-5 col-lg-5"></div>
+	{% endif %}
+		        </div>
+		</div>
+</div>
+<!-- END OF: footer -->
+
+
+{% endblock main %}
+{# END OF: main #}

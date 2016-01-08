@@ -1,0 +1,1085 @@
+{#
+Appiaries Push Notifications EC-CUBE 3 Plugin v1.0.0
+melissa always loves you!
+Copyright (c) 2015 Appiaries Co.
+Under the terms of the MIT license.
+http://www.appiaries.com/
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#}
+
+{% extends 'default_frame.twig' %}
+
+{% block title %}プッシュ配信プラグイン設定{% endblock %}
+{% block sub_title %}「アピアリーズ設定」と「プラグインのご利用方法」{% endblock %}
+
+{% form_theme config_form 'Form/bootstrap_3_horizontal_layout.html.twig' %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="{{ app.config.admin_urlpath }}/assets/css/bootstrap-datetimepicker.min.css">
+<style>
+.bold { font-weight: bold; }
+.small { font-size: 75%; }
+.large { font-size: 120%; }
+.xlarge { font-size: 150%; }
+.grey { color: #b3b3b3; }
+.darkgrey { color: #464646; }
+.red { color: #df0000; }
+.darkred { color: #cc2525; }
+.palered { color: #f18080; }
+.darkpalered { color: #9a0e0e; }
+.green { color: #529a4e; }
+.darkgreen { color: #387908; }
+.lawngreen { color: #76b514; }
+.skyblue { color: #339ace; }
+.firebrick { color: #d4642d; }
+.marker {
+  border-bottom: solid 2px #cc2525; /* #ffbdbd, #b94141 */
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.note {
+  font-size: 75%;
+  color: #505050;
+  font-weight: normal;
+}
+.prod_name {
+/*
+  font-style: italic;
+  color: #af2c2c;
+*/
+  font-size: 85%;
+  letter-spacing: 0.12em;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+/*
+ * Nested list-group example sniplet copied from bellow post on StackOverflow:
+ * http://stackoverflow.com/questions/29063244/consistent-styling-for-nested-lists-with-bootstrap#33571268
+ *    Contributor : Marcos
+ *    Link : http://stackoverflow.com/users/3079753/marcos
+ */
+
+.list-group.list-group-root {
+  padding: 0;
+  overflow: hidden;
+}
+.list-group.list-group-root .list-group {
+  margin-bottom: 0;
+}
+.list-group.list-group-root .list-group-item {
+  border-radius: 0;
+  border-width: 1px 0 0 0;
+}
+.list-group.list-group-root > .list-group-item:first-child {
+  border-top-width: 0;
+}
+.list-group.list-group-root > .list-group > .list-group-item {
+  padding-left: 4em;
+}
+.list-group.list-group-root > .list-group > .list-group > .list-group-item {
+  padding-left: 8em;
+}
+/* ===================================
+ * END OF: Nested "list-group"
+ */
+
+.simple_table, .simple_table th, .simple_table td {
+  border: solid 1px #d8d8d8;
+  padding: 4px;
+  text-align: center;
+}
+
+#caution_for_outdate {
+  border: solid 1px #b2d0e0;
+  padding: 6px;
+  font-size: 82%;
+  letter-spacing: 0.06em;
+  color: #4d7b94;
+  background-color: #fbfeff;
+  line-height: 170%;
+}
+#caution_title {
+  padding: 4px;
+  color: #fbfeff;
+  background-color: #469ac7;
+}
+#what_is_baas {
+  border: solid 1px #f7f1d3;
+  padding: 6px;
+  font-size: 82%;
+  letter-spacing: 0.06em;
+  color: #3c332a;
+  background-color: #fffdf2;
+  line-height: 170%;
+}
+.desc {
+  margin-top: 3.5em;
+  margin-bottom: 1.5em;
+}
+.desc h4 {
+  font-size: 130%;
+  font-weight: bold;
+  border-bottom: solid 1px #505050;
+  border-left: solid 16px #505050;
+  padding-left: 8px;
+  padding-top: 2px;
+  padding-bottom: 4px;
+}
+.desc p, .sub_desc table {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+.desc p {
+  width: 95%;
+}
+.sub_desc {
+  margin-top: 2.5em;
+  margin-bottom: 1em;
+}
+.sub_desc h5 {
+  margin-top: 2.5em;
+  font-size: 110%;
+  font-weight: bold;
+  border-left: solid 14px #d4d4d4;
+  margin-left: 1em;
+  padding-left: 8px;
+  padding-top: 2px;
+  padding-bottom: 0px;
+}
+.sub_desc p, .sub_desc table {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  margin-left: 2em;
+}
+.sub_desc table {
+  margin-left: 3em;
+}
+.sub_desc p {
+  width: 80%;
+}
+.desc h4:after, .sub_desc h5:after {
+  position: relative;
+  margin-left: 10px;
+}
+.desc h4:after {
+  content: url("{{ app.config.root_urlpath }}/plugin/Appiaries/imgs/arrow_h4.png");
+  top: 4px;
+}
+.sub_desc h5:after {
+  content: url("{{ app.config.root_urlpath }}/plugin/Appiaries/imgs/arrow_h5.png");
+  top: 2px;
+}
+.padleft {
+  padding-left: 1.5em;
+}
+.padleft_more {
+  padding-left: 3.5em;
+}
+.arrow_left:before {
+  content: url("{{ app.config.root_urlpath }}/plugin/Appiaries/imgs/arrow_left.png");
+  padding-right: 6px;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script>
+const ADJUST		= 140;
+const LINK_CURSOR	= 'pointer';
+const LINK_COLOR	= '#337ab7';
+const JUMP_BACK_TIMER = 10;
+
+var default_jump_back = $('#jump_scroll_top').offset().top;
+default_jump_back = default_jump_back ? parseInt(default_jump_back - 100) : 0;
+var tmp_jump_back = default_jump_back;
+
+var add_listener_for_target = function(key, listener){
+	if (!key || typeof listener !== 'function') { throw new Error('no_args'); }
+	$('a[name="' + key + '"]').off().on('click', listener);
+};
+
+var rgb_to_hex = function(rgb){
+	rgb = rgb.toString();
+	rgb = rgb.replace('rgba', 'rgb');
+	rgb = rgb.replace('rgb(', '');
+	rgb = rgb.replace(')', '');
+	rgb = rgb.split(',');
+	rgb = rgb.map(function(n,i){
+		var s = parseInt(n).toString(16);
+		return (s == '0') ? '00' : s;
+	});
+	if (rgb.length >= 4) { rgb.pop(); }
+	return '#' + rgb.join('');
+};
+
+$('*[data-target]').each(function(){
+	var key = $(this).data('target');
+	var target = key ? $('a[name="' + key + '"]') : null;
+	if (target.length) {
+
+		// Click the link.
+		$(this).css({
+			cursor: LINK_CURSOR,
+			color: LINK_COLOR,
+		}).off().on('click', (function(){
+			var __pos = parseInt(target.offset().top - ADJUST);
+			var __key = key;
+
+			// When the link is clicked...
+			return function(e){
+
+				// Font color for the link element will become "#cc2525".
+				var __target = $('a[name="' + __key + '"]');
+				var color = __target.css('color');
+				var size = __target.css('font-size');
+				color = color ? rgb_to_hex(color) : '#444444';
+				console.log('  color: ' + color);
+				if (color) {
+					__target.css({
+						'font-size': '220%',
+						'color': '#cc2525'
+					});
+					setTimeout(function(){
+						__target.animate({ 'font-size': size }, 300, null, function(){
+							__target.css({ 'color': color });
+						});
+					}, 900);
+				}
+
+				jump(__pos); // Jumping to the target element.
+
+				// After the jump, set a temporally jump back click listener
+				// to the target which takes you back to the link.
+				tmp_jump_back = parseInt($(this).offset().top - ADJUST - 200);
+				add_listener_for_target(__key, function(){ jump(tmp_jump_back); });
+
+				// But after a while, it sets the listener back
+				// to the original jump-back position (which is the page top).
+				setTimeout(function(){
+					add_listener_for_target(__key, function(){
+							jump(default_jump_back);
+						});
+				}, JUMP_BACK_TIMER * 1000);
+			};
+		})());
+
+		// Clicking the target element simply takes you to the page top.
+		target.css({cursor: 'pointer'})
+			.off().on('click', function(){
+				jump(default_jump_back);
+			});
+	}
+	key = target = void 0;
+});
+$('.example_set_whats_needed').each(function(){
+	var pos = $(this).offset().top;
+	if (pos) {
+		$(this).css({
+			cursor: LINK_CURSOR,
+			color: LINK_COLOR,
+			'text-decoration': 'underline',
+		}).off().on('click', function(){
+			jump(0, null, (function(){
+				var __pos = pos;
+				return show_pointing_arrows(__pos);
+			})());
+		});
+	}
+});
+function jump(i, options, callback) {
+	var speed	= 'fast';
+	var easing	= 'linear';
+	if (typeof options === 'object' && options != null) {
+		if (typeof options.speed !== 'undefined') { speed = options.speed; }
+		if (typeof options.easing !== 'undefined') { easing = options.easing; }
+	}
+	$("html,body")
+		.animate({ scrollTop: i }, speed, easing, function(){
+			if (typeof callback === 'function') {
+				callback();
+			}
+		});
+}
+function remove_arrows() {
+	var arrows = $('.pointing_arrows');
+	arrows.each(function(){ $(this).remove(); });
+}
+function show_pointing_arrows(back_to_pos) {
+	var ok = 1;
+	var f = {};
+	f.data = {};
+	['datastore_id','app_id','app_token'].map(function(key){
+		f.data[key] = $('#appiaries_settings_' + key);
+		if (!f.data[key].length) {
+			ok *= 0;
+		}
+	});
+	if (back_to_pos && ok) {
+		back_to_pos -= ADJUST + 180;
+		remove_arrows();
+		var extra_offset = 0;
+		Object.keys(f.data).forEach(function(key, i){
+			this[key].after(
+				$('<img>')
+					.attr({
+src: '{{ app.config.root_urlpath }}/plugin/Appiaries/imgs/arrow_point.png',
+						class: 'pointing_arrows',
+					})
+					.css({
+						position: 'absolute',
+						display: 'none',
+						top: -10,
+						left: (180 + extra_offset),
+					})
+			);
+			extra_offset += 80;
+			if (i >= 2) {
+				var arrows = $('.pointing_arrows');
+				arrows.show(400, function(){
+					setTimeout(function(){
+						arrows.remove();
+						jump(back_to_pos, { speed: 'slow' });
+					}, 1800);
+				});
+			}
+		}, f.data);
+	}
+}
+</script>
+{% endblock javascript %}
+
+{% block main %}
+
+<!-- BEGIN: Appiaries Settings -->
+<div class="col-md-12 col-lg-12">
+
+	<div id="debug" style="margin-top:10px;display:none;"></div>
+
+	<!-- BEGIN: Appiaries Plugin Config Form -->
+	<form id="config_form" method="POST"
+		action="{{ url('plugin_Appiaries_config') }}" role="form" class="form-horizontal">
+
+	{# This will automatically insert the EC-CUBE session token #}
+	{{ form_widget(config_form._token) }}
+
+	<div class="col-md-9 col-lg-9">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">アピアリーズ設定</h3>
+				<p>アピアリーズへ登録後、発行された情報を設定します。</p>
+			</div>
+			<div class="box-body">
+				{{ form_row(config_form.datastore_id, {
+						'value' : datastore_id ~ "",
+						'attr': { 'id': 'datastore_id' }
+					}) }}
+				{{ form_row(config_form.app_id, {
+						'value' : app_id ~ "", 'attr': { 'id': 'app_id' }
+					}) }}
+				{{ form_row(config_form.app_token, {
+						'value' : app_token ~ "", 'attr': { 'id': 'app_token' }
+					}) }}
+			</div>
+		</div>
+	</div>
+
+	<div id="aside_column" class="col-md-3 col-lg-3">
+		<div class="col_inner">
+			<div class="box no-header">
+				<div class="box-body">
+					<div class="row text-center">
+						<div class="col-sm-6 col-sm-offset-3 col-md-12 col-md-offset-0">
+			<input type="submit" id="btn_submit_config_form"
+				class="btn btn-primary btn-block btn-lg" value="登録" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	</form>
+	<!-- END OF: Appiaries Plugin Config Form -->
+
+
+	<!-- BEGIN: Appiaries Plugin Description -->
+	<div class="col-md-9 col-lg-9" id="jump_scroll_top">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">プラグインのご利用方法</h3>
+			</div>
+			<!-- BEGIN: "box-body" (for "Description") -->
+			<div class="box-body">
+
+				<ul class="list-group list-group-root well">
+				<li class="list-group-item"
+					data-target="about">プラグインついて</li>
+					<ul class="list-group">
+					<li class="list-group-item"
+						data-target="provider">提供元について</li>
+					<li class="list-group-item"
+						data-target="required">プラグインをご利用いただくには</li>
+					</ul>
+				<li class="list-group-item"
+					data-target="push_prepare">プッシュ配信の準備をする</li>
+					<ul class="list-group">
+					<li class="list-group-item"
+						data-target="platform_signup"
+							>Ａ．プラットフォームに登録する</li>
+					<li class="list-group-item"
+						data-target="appiaries_signup"
+							>Ｂ．アピアリーズに登録する</li>
+					<li class="list-group-item"
+						data-target="appiaries_setups"
+							>Ｃ．アピアリーズに必要な情報を設定する</li>
+					<li class="list-group-item"
+						data-target="plugin_setups"
+							>Ｄ．プラグインに必要な情報を設定する</li>
+					</ul>
+				<li class="list-group-item"
+					data-target="push_app">アプリを開発する</li>
+				<li class="list-group-item"
+					data-target="important">重要事項 <span class="bold palered small">＜ 必ずお読み下さい ＞</span></li>
+				<li class="list-group-item"
+					data-target="troubles">困ったときは</li>
+				</ul>
+
+
+				<div class="desc">
+
+<p id="caution_for_outdate" style="margin-left:5em;width:60%;">
+<span id="caution_title">ご案内</span><br
+	/>インストールして日数の経過しているとき、<span
+	/>以下に提供されるプラグインの説明内容が古くなり、<span
+	/>API などの技術的な仕様が変更されている可能性がございます。<br
+	/>最新の情報につきましては、アピアリーズ公式ドキュメントサイトを<span
+	/>参照いただきますようお願いいたします。<br /><br
+	/><a href="http://docs.appiaries.com/" style="padding-left:2em;"
+	target="_blank">アピアリーズ ‐ 公式ドキュメントサイト<br
+	/><span style="padding-left:2em;">http://docs.appiaries.com/</span></a>
+</p>
+				</div>
+
+
+				<!-- BEGIN: Description: about -->
+				<div class="desc">
+					<a name="about"><h4>プラグインについて</h4></a>
+<p>
+「Appiaries (アピアリーズ) プッシュ配信プラグイン」は、EC-CUBE で<span
+	/>運営される店舗をモバイル端末から利用されるお客様に<span
+	/>手軽にプッシュ通知を配信できるプラグインです。
+</p>
+<p>
+iOS 端末の場合は <span class="prod_name">APNs (Apple Push Notification Service)</span>、
+Android 端末の場合は
+<span class="prod_name">GCM (Google Cloud Messaging) </span>
+のそれぞれのプラットフォームを用いてプッシュ通知を配信するため、本プラグインは
+</p>
+<p>
+<a href="http://docs.appiaries.com/?p=15857"
+	target="_blank" class="bold">「アピアリーズ・プッシュ配信エンジン」</a>
+</p>
+<p>
+を利用しています。
+</p>
+
+
+					<div class="sub_desc">
+						<a name="provider"><h5>提供元について</h5></a>
+
+<p style="margin-top:3em;margin-bottom:3em;">
+<span class="bold">「Appiaries (アピアリーズ) 」</span
+	>は国内で最初の <span class="bold"
+	style="letter-spacing:0.1em;">BaaS (Backend as a Service)</span> です。
+</p>
+<p class="padleft">
+<a href="http://www.appiaries.com/" target="_blank">
+<img src="{{ app.config.root_urlpath }}/plugin/Appiaries/imgs/logo.png"
+	style="width:560px;" /></a>
+</p>
+<p>
+<p id="what_is_baas" style="margin-top:2.5em;margin-bottom:2em;margin-left:4em;width:65%;">
+<span class="bold large"
+	style="letter-spacing:0.1em;">《 BaaS (Backend as a Service) 》とは、</span><span
+	/>限られた予算・工数・リソースで、サーバサイドの開発を必要とするアプリ開発をするとき、<span
+	class="bold large darkred">通常は開発に数ヶ月はかかるような「ユーザ認証機能」「データベース機能」「GPS 地理情報機能」「プッシュ配信機能」といったサーバサイドでよく使われる機能を、安価で、すぐに利用できるクラウドサービスのこと</span>
+	です。モバイル・アプリからは API 通信によって各機能を簡単に操作することができます。
+</p>
+<p>
+本プラグインは、EC-CUBE 店舗内でプッシュ配信を実現するために<a
+	href="http://docs.appiaries.com/?p=15857" target="_blank"
+	class="bold">「アピアリーズ・プッシュ配信エンジン」</a>を利用しています。<span
+	/>「 Appiaries (アピアリーズ) 」は、国内大手の企業の多くのお客様に<span
+	/>ご利用いただいている国内有数の BaaS サービスです。
+</p>
+<p class="note padleft">
+※ <a href="http://www.appiaries.com/jp/case/"
+	target="_blank">事例についてはこちら</a> をご覧ください。
+</p>
+<p style="margin-top:2em;">
+<span class="large">「 Appiaries 」</span> は<br />
+<a href="http://www.pcp.co.jp/" target="_blank"
+	class="bold xlarge">「 ピーシーフェーズ株式会社 」</a><br />
+&nbsp; が運営しています。
+</p>
+<p style="margin-top:2em;padding-left:2em;">
+<a href="http://www.pcp.co.jp/" target="_blank">
+<img src="{{ app.config.root_urlpath }}/plugin/Appiaries/imgs/logo_pcp.png"
+	style="width:180px;" /></a>
+</p>
+<p style="margin-top:2em;margin-bottom:4em;padding-left:2em;">
+<span class="bold">ピーシーフェーズ株式会社</span><br />
+・50社を超えるO2O導入および運用実績<br />
+・ワンストップソリューション<br />
+・最先端技術を採用した大手通信キャリア向け大規模システム開発実績
+</p>
+					</div>
+
+					<div class="sub_desc">
+						<a name="required"><h5>プラグインをご利用いただくには</h5></a>
+<p>
+本プラグインをご利用いただくために必須な作業は、大まかに２つあります。
+</p>
+
+<p class="bold" style="margin-top:2em;"
+		data-target="push_prepare">「プッシュ配信の準備をする」</p>
+
+<p class="padleft">・プラットフォームへの登録</p>
+<p class="padleft_more">
+プッシュ配信をおこなうには、iOS 端末の場合は <span
+	class="prod_name">APNs (Apple Push Notification Service)</span> 、<span
+	/>Android 端末の場合は <span
+	class="prod_name">GCM (Google Cloud Messaging)</span> の <span
+	class="marker">プラットフォームへの登録</span> と、<span
+	/>さらにそれぞれについて <span
+	class="marker">プッシュ配信のための設定</span> が必要です。
+</p>
+<p class="padleft">・アピアリーズへの登録</p>
+<p class="padleft_more">
+プラグインは、プッシュ配信を管理するために<a href="http://www.appiaries.com/"
+	target="_blank">「アピアリーズ・プッシュ配信エンジン」</a>を利用するため、<span
+	class="marker">アピアリーズへの事前の会員登録</span> が必要となります。
+</p>
+<p class="padleft">・アピアリーズの設定およびプラグインの設定</p>
+<p class="padleft_more">
+アピアリーズがプラットフォームと通信するために <span	
+	class="marker">プラットフォームの情報をアピアリーズに設定</span> する必要があります。<span
+	/>おなじく、プラグインがアピアリーズと通信するために <span
+	class="marker">アピアリーズの情報をプラグインに設定</span> する必要があります。
+</p>
+
+<p class="bold palered" style="margin-top:2em;"
+		data-target="push_app">「アプリを開発する」</p>
+
+<p class="padleft">・アプリ開発</p>
+<p class="padleft_more">
+配信されるプッシュ通知をお客様がモバイル端末で受け取るには <span
+	class="marker">通知を受信するためのアプリを用意</span> する必要があります。
+</p>
+					</div>
+				</div>
+
+				<!-- BEGIN: Description: push_prepare -->
+				<div class="desc">
+
+					<a name="push_prepare"><h4>プッシュ配信の準備をする</h4></a>
+<p>
+プラグインをもちいてプッシュ配信をするための<span
+	class="bold darkred">「準備」</span>について説明します。
+</p>
+
+					<div class="sub_desc">
+<p>
+プッシュ配信のための準備はＡ～Ｄのステップに分けられます。<br
+	/>全体としては以下のような流れとなります。
+</p>
+
+<p class="bold"><span data-target="platform_signup"
+	>Ａ．プラットフォームに登録する</span></p>
+<p class="padleft arrow_left">APNs または GCM にアカウント登録します。</p>
+<p class="padleft arrow_left">それぞれに必要な設定をおこないます。<br />
+	<span class="padleft note">※ APNs の場合は<span
+		class="bold xlarge darkgreen">「p12 形式証明書」</span>が発行されます</span><br />
+	<span class="padleft note">※ GCM の場合は<span
+	class="bold xlarge darkgreen">「API Key」</span>と<span
+	class="bold xlarge darkgreen">「Project Number」</span>が発行されます</span>
+<p class="padleft arrow_left">プラットフォームのコードを控えておきます。<br />
+	<span class="padleft note">※ APNs は証明書の<span
+		class="bold xlarge darkgreen">「パスワード」</span>
+		もアピアリーズの設定で使います。</span>
+</p>
+
+<p class="bold"><span data-target="appiaries_signup"
+	>Ｂ．アピアリーズに登録する</span></p>
+<p class="padleft arrow_left">アピアリーズにアカウント登録します。</p>
+<p class="padleft arrow_left">いずれかの「データストア」を契約します。<br />
+	<span class="padleft note">※<span
+		class="bold xlarge darkgreen">「データストア ID」</span>はご自身で決めていただきます</span>
+</p>
+<p class="padleft arrow_left">「アプリ」を登録します。<br />
+	<span class="padleft note">※<span
+		class="bold xlarge darkgreen">「アプリ ID」</span>はご自身で決めていただきます</span><br />
+	<span class="padleft note">※<span
+		class="bold xlarge darkgreen">「アプリトークン」</span>は自動的に発行されます</span>
+</p>
+<p class="padleft arrow_left">アピアリーズのコードを控えておきます。</p>
+
+<p class="bold"><span data-target="appiaries_setups"
+	>Ｃ．アピアリーズに必要な情報を設定する</span></p>
+<p class="padleft arrow_left">アピアリーズにログインします。</p>
+<p class="padleft arrow_left">プッシュ API 通信を許可するためのスイッチを ON にします。</p>
+<p class="padleft arrow_left">プラットフォームへの登録で発行されたコードを入力します。</p>
+
+<p class="bold"><span data-target="plugin_setups"
+	>Ｄ．プラグインに必要な情報を設定する</span></p>
+<p class="padleft arrow_left">設定ページにアクセスします。<br />
+	<span class="padleft note">※ このページのことです</span>
+</p>
+<p class="padleft arrow_left">アピアリーズへの登録で発行されたコードを入力します。<br />
+	<span class="padleft note">※ コードを入力するのは <span
+		class="bold example_set_whats_needed">このフォーム</span> です</span>
+</p>
+<p>
+以降、それぞれについて説明していきます。
+</p>
+					</div>
+
+
+					<div class="sub_desc">
+						<a name="platform_signup"
+							><h5>Ａ．プラットフォームに登録する</h5></a>
+<p>
+<span class="prod_name">APNs (Apple Push Notification Service)</span>
+	または <span class="prod_name">GCM (Google Cloud Messaging) </span>
+	でプッシュ配信を設定する方法の詳細は、以下のアピアリーズの<span
+	/>公式ドキュメントサイトに記載されているので、こちらを参照してください。
+<p>
+<p>APNs のプッシュ配信設定方法</p>
+<p class="padleft"><a
+	href="http://docs.appiaries.com/?p=14977"
+	target="_blank">プッシュ通知用 p12 形式証明書を作成する<br
+	/>http://docs.appiaries.com/?p=14977</a>
+</p>
+<p>GCM のプッシュ配信設定方法</p>
+<p class="padleft"><a
+	href="http://docs.appiaries.com/?p=13601"
+	target="_blank">プロジェクト作成および Googleサービスの有効化<br
+	/>http://docs.appiaries.com/?p=13601</a>
+</p>
+<p class="padleft"><a
+	href="http://docs.appiaries.com/?p=13603"
+	target="_blank">Project Number と API キー (Server Key)<br
+	/>http://docs.appiaries.com/?p=13603</a>
+</p>
+<p>
+プラットフォームへの登録が完了すると、プッシュ配信に必要なコードがそれぞれで取得できます。
+</p>
+<p>
+APNs へ登録することで<span class="bold large darkgreen">「p12 形式証明書」</span> が手に入ります。<br />
+GCM へ登録することで <span class="bold large darkgreen">「API Key」</span> および <span
+	class="bold large darkgreen">「Project Number」</span> が手に入ります。
+</p>
+<p>
+これらは後に必要となるコードですので、なくさず控えておくようにしてください。
+</p>
+					</div>
+
+
+
+					<div class="sub_desc">
+						<a name="appiaries_signup"
+							><h5>Ｂ．アピアリーズに登録する</h5></a>
+<p>
+アピアリーズへの会員登録は無料です。会員登録の方法については、<span
+	/>以下のアピアリーズの公式ドキュメントサイトに詳細な手順がありますので、<span
+	/>こちらを参照してください。
+<p class="padleft"><a
+	href="http://docs.appiaries.com/?p=50"
+	target="_blank">アカウントを作成する<br
+	/>http://docs.appiaries.com/?p=50</a>
+</p>
+<p>
+上記のドキュメントでは、会員登録後に<span
+	class="bold darkred">「データストア」</span>の契約についても説明されます。<br
+	/>プッシュ配信をおこなうには、いずれかのデータストアのプランを選択する必要があります。
+</p>
+<p>
+「体験版プラン（無償）」でもプッシュ配信は可能ですが、<span
+	class="marker">月ごとのプッシュ配信数の上限や、API リクエスト数の上限などの制約が</span>
+	ありますので、店舗カスタマーへのプッシュ配信を<span
+	class="marker">商用で運用される場合は有償版のご検討</span> をお勧めします。
+</p>
+<p>
+各種プランについては公式ホームページの一覧を参照ください。
+</p>
+<p class="padleft"><a
+	href="http://www.appiaries.com/jp/pricing/"
+	target="_blank">アピアリーズ ‐ 料金・機能一覧表<br
+	/>http://www.appiaries.com/jp/pricing/</a>
+</p>
+<p>
+データストアの契約の後、次に<span
+	class="bold darkred">「アプリ」</span>の登録が必要です。<span
+	/>一つのデータストアには複数の「アプリ」を登録することができます。<span
+	/>「アプリ」とは、アピアリーズのデータストア上で<span
+	/>ほかのアプリの設定と区別するための単位であり、<span
+	/>通常はアピアリーズを使って実際に運用される <span
+	class="marker">ひとつのクライアントアプリに対してひとつの「アプリ」を登録する</span>
+	ことになります。
+</p>
+<p class="padleft"><a href="http://docs.appiaries.com/?p=60"
+	target="_blank">アプリを設定する<br
+	/>http://docs.appiaries.com/?p=60</a>
+</p>
+<p>
+これらの登録が完了すると<span class="bold large darkgreen">「データストア ID」</span><span
+	class="bold large darkgreen">「アプリ ID」</span><span
+	class="bold large darkgreen">「アプリトークン」</span>が手に入ります。<br
+	/>いずれも当該アプリの<span class="">「ダッシュボード」</span>画面で確認できます。<br
+	/>これらは後に必要となるコードですので、なくさず控えておくようにしてください。
+</p>
+<p>
+<img src="{{ app.config.root_urlpath }}/plugin/Appiaries/imgs/where_codes_are.png" />
+</p>
+					</div>
+
+
+
+					<div class="sub_desc">
+						<a name="appiaries_setups"
+							><h5>Ｃ．アピアリーズに必要な情報を設定する</h5></a>
+<p>
+アピアリーズにログイン後、まずはプラグインが外部から API 通信できるように <span
+	class="marker">外部プッシュ API 通信を許可するためのスイッチを ON</span> にする<span
+	/>必要があります。またアピアリーズがプラットフォームと通信できるよう、<span
+	class="marker">プラットフォームから取得したコードのアピアリーズへの設定する</span>
+	ことも必要となります。
+</p>
+<p>
+<span class="bold">１．外部プッシュ API 通信スイッチを ON にする</span>
+</p>
+<p class="padleft">
+アピアリーズにログイン後、当該アプリの「ダッシュボード」の上部メニューから<span
+	class="">「プッシュ通知」</span>を選択し、<span
+	/>表示される画面のサブメニューにて<span
+	class="">「基本設定」</span>を選択します。<br
+	/>このページの最上部に表示される<span
+	class="bold darkred">「デバイス Push 利用」</span>のボタンを ON にします。
+</p>
+<p>
+<img src="{{ app.config.root_urlpath }}/plugin/Appiaries/imgs/switch.png" />
+</p>
+<p>
+<span class="bold">２．プラットフォームの情報を設定する</span>
+</p>
+<p class="padleft">
+プッシュ通知画面のサブメニューにて<span
+	class="">「マーケット設定」</span>を選択します。
+</p>
+<p class="padleft" style="margin-top:2em;"><span class="arrow_left">APNs</span> の場合はこのページで<span
+	class="bold large darkgreen">「p12 形式証明書」</span> を登録します。<br
+	/>&nbsp; &nbsp; 証明書の<span
+	class="bold large darkgreen">「パスワード」</span>もお忘れなく設定してください。<br
+	/><br /><img src="{{ app.config.root_urlpath }}/plugin/Appiaries/imgs/market_ios.png" />
+</p>
+<p class="padleft" style="margin-top:2em;"><span class="arrow_left">GCM</span> の場合はこのページで<span
+	class="bold large darkgreen">「API Key」</span> を登録します。<br /><span class="grey"
+	style="font-size:75%;">&nbsp; &nbsp; ※ GCM で取得したもう一つの<span
+		class="bold darkgreen">「Project Number」</span>のほうはアプリを開発するときに使われます</span><br
+	/>&nbsp; &nbsp; このとき「カスタムキー設定」には<br /><span
+	class="bold darkred">&nbsp; &nbsp; 必ず "title" および "message" を設定して下さい。２つがない場合、</span><br
+	/><span class="bold darkred">&nbsp; &nbsp; アプリ側が「タイトル」と「メッセージ」を受け取れなくなります。</span><br
+	/><span class="grey" style="font-size:75%;">&nbsp; &nbsp; ※ <span
+		data-target="important">「重要事項」</span>にさらに詳細な説明があります。</span><br
+	/><br /><img src="{{ app.config.root_urlpath }}/plugin/Appiaries/imgs/market_android.png" />
+
+</p>
+<p>
+いずれも <span class="marker">公式ドキュメントサイトに設定の手順が公開されています</span>
+	ので、詳細はそちらの資料を参照してください。
+</p>
+<p class="padleft">
+<a href="http://docs.appiaries.com/?p=15866" target="_blank">
+プッシュ配信のための準備<br />
+http://docs.appiaries.com/?p=15866</a>
+</p>
+					</div>
+
+
+
+					<div class="sub_desc">
+						<a name="plugin_setups"
+							><h5>Ｄ．プラグインに必要な情報を設定する</h5></a>
+<p>
+プラグインがアピアリーズと通信をするとき、ほんとうに店舗からの<span
+	/>アクセスであるかどうか認証が必要です。このため <span
+	class="marker">アピアリーズへの登録時に取得した情報をプラグインに設定する</span>
+	必要があります。
+</p>
+<p>
+<span data-target="appiaries_signup">「Ｂ．アピアリーズに登録する」</span>で取得した<span
+	class="bold large darkgreen">「データストア ID」</span><span
+	class="bold large darkgreen">「アプリ ID」</span><span
+	class="bold large darkgreen">「アプリトークン」</span>を、<span
+	/>本プラグインの「アピアリーズ設定」（このページのことです）に入力し、登録します。
+</p>
+<p>
+具体的には <span class="example_set_whats_needed">こちらに設定</span> してください。
+</p>
+					</div>
+
+				</div>
+				<!-- END OF: Description: push_prepare -->
+
+
+
+				<!-- BEGIN: Description: push_app -->
+				<div class="desc">
+					<a name="push_app"><h4>アプリを開発する</h4></a>
+
+<p>
+アプリの開発については、アピアリーズの公式ドキュメントサイトから<br
+	/>プッシュ通知受信のためのブランクプロジェクトがダウンロードいただけます。<br
+	/>こちらをカスタマイズすることで店舗用のアプリが比較的容易に開発できるはずです。
+</p>
+
+<p class="bold large">アプリの開発</p>
+
+<p class="padleft">
+<a href="http://docs.appiaries.com/?p=14416"
+		target="_blank">iOS 用プッシュ通知受信サンプルアプリ<br
+	/>http://docs.appiaries.com/?p=14416</a><br
+	/>ページ内の「ブランク・プロジェクト」より以下の二つを選択いただけます。<br
+	/>通常は <span class="green">ObjCBlankPushApp-2_0_7.zip</span> をご利用ください。<br
+	/>CocoaPods を利用されている方は <span
+		class="green">ObjCPodsBlankPushApp-2_0_7.zip</span> をご利用ください。
+</p>
+
+<p class="padleft">
+<a href="http://docs.appiaries.com/?p=14066"
+		target="_blank">Android 用プッシュ通知受信サンプルアプリ<br
+	/>http://docs.appiaries.com/?p=14066</a><br
+	/>ページ内の「ブランク・プロジェクト」より以下の二つを選択いただけます。<br
+	/>Android Studio の場合は <span
+		class="green">androidstudio-BlankPushApp-2_0_10.zip</span> をご利用ください。<br
+	/>Eclipse の場合は <span
+		class="green">adt-BlankPushApp-2_0_10.zip</span> をご利用ください。
+</p>
+
+<p class="bold large">プラグインとの連携</p>
+
+<p>
+上記サンプルアプリによってプッシュを受信することができるようになりますが、<br
+	/>Appiaries プッシュ通知プラグインと連携するための実装が必要となります。<br
+	/>サンプルアプリは APNs または GCM からデバイス ID を取得するための<br
+	/>コードが記述されていますが、このとき、取得したデバイス ID を<br
+	/>Appiaries プッシュ通知プラグインに登録しなければなりません。
+</p>
+
+<p>
+ユーザ毎に異なるデバイス ID は、ユーザが店舗にログインするときに<br
+	/>プラグイン側に渡す必要があります。<br
+	/>具体的には、WebView に表示される店舗のウェブサイトのページのうち、<br
+	/>/mypage/login のページに表示されるフォームに新しく二つの<br
+	/>入力フォームが追加されるようにします。
+</p>
+
+<p class="padleft bold">
+(a) デバイス ID を hidden 入力フォームとして埋め込む
+</p>
+
+<p class="padleft">
+一つ目の hidden フォームは「デバイス ID」です。
+アプリが取得した「デバイス ID」は、以下のように hidden の
+入力フォームとしてウェブサイトのページに埋め込むようにして下さい。
+</p>
+
+<p class="padleft">
+<font color="green">&lt;input type="hidden" name="login_device_id" value="(デバイス ID)" /&gt;</font>
+</p>
+
+<p class="padleft bold">
+(b) OS 種別を hidden 入力フォームとして埋め込む
+</p>
+
+<p class="padleft">
+二つ目の hidden フォームは「OS 種別」です。
+iOS アプリの場合は固定で以下を埋め込んでください。
+</p>
+
+<p class="padleft">
+<font color="green">&lt;input type="hidden" name="login_os" value="ios" /&gt;</font>
+</p>
+
+<p class="padleft">
+Android アプリの場合は固定で以下を埋め込んでください。
+</p>
+
+<p class="padleft">
+<font color="green">&lt;input type="hidden" name="login_os" value="android" /&gt;</font>
+</p>
+
+
+				</div>
+				<!-- END OF: Description: push_app -->
+
+
+
+				<!-- BEGIN: Description: important -->
+				<div class="desc">
+					<a name="important"><h4>重要事項</h4></a>
+<p>
+本プラグインをご利用いただく上で注意すべき事項の大半については、<span
+	/>各ページの当該箇所に注意書きを記載してありますが、<span
+	/>その中でも特に特筆して注意すべき事項は以下の通りです。
+</p>
+
+					<div class="sub_desc">
+
+<p class="bold xlarge darkred">「一ヶ月以降の配信予約はできません」</p>
+
+<p class="padleft">
+現在時刻より前の日時を指定できないのは当然ですが、配信予約を登録するとき、<span
+	class="bold">登録するときから一ヶ月以降の日時は指定できない</span>
+	のでご注意ください。
+</p>
+
+<p class="bold xlarge darkred"
+	style="margin-top:2em;">「一度に予約できる配信は 1000 件です」</p>
+
+<p class="padleft">
+配信予約を登録するとき、<span
+	class="bold">配信対象の端末として 1000 件以上が検索された場合、対象端末のリストは自動的に
+	1000 ずつ <span class="bold darkred">"分割"</span> して個別の配信予約として登録</span> されます。<span
+	/>またそのときに登録される配信予約タイトルを元にして最後に<span
+	/>(1), (2), (3), (4)... を付加して個別に登録されます。
+</p>
+
+<p class="padleft">
+例えば、対象端末の検索で 5,880 件が抽出された場合、<span
+	/>またその配信予約タイトルが「夏休みキャンペーン・第5弾」である場合、<span
+	/>配信予約は以下のように分割して登録されます。
+</p>
+
+<table class="simple_table">
+<tr>
+<th>分割された配信予約タイトル</th>
+<th>分割された配信数</th>
+</tr>
+<tr>
+<td>「夏休みキャンペーン・第5弾 (1)」</td>
+<td>1 ～ 1000 件</td>
+</tr>
+<tr>
+<td>「夏休みキャンペーン・第5弾 (2)」</td>
+<td>1001 ～ 2000 件</td>
+</tr>
+<tr>
+<td>「夏休みキャンペーン・第5弾 (3)」</td>
+<td>2001 ～ 3000 件</td>
+</tr>
+<tr>
+<td>「夏休みキャンペーン・第5弾 (4)」</td>
+<td>3001 ～ 4000 件</td>
+</tr>
+<tr>
+<td>「夏休みキャンペーン・第5弾 (5)」</td>
+<td>4001 ～ 5000 件</td>
+</tr>
+<tr>
+<td>「夏休みキャンペーン・第5弾 (6)」</td>
+<td>5001 ～ 5880 件</td>
+</tr>
+</table>
+
+<p class="padleft">
+1000 件ごとの配信予約の分割が何らかの支障となる場合、<span
+	class="bold">アピアリーズの管理画面をご利用いただくことで、制限を受けずに配信予約が可能</span>
+	となります。プラグインの利用時に登録したアカウントでそのまま<span
+	/>ログインできますので、選択肢の一つとしてご検討下さい。
+</p>
+
+<p class="bold xlarge darkred"
+	style="margin-top:2em;">「アピアリーズに title と
+		message を設定してください」</p>
+
+<p class="padleft">
+<span data-target="appiaries_setups">「Ｃ．アピアリーズに必要な情報を設定する」の「２．プラットフォームの情報を設定する」</span>
+	で説明されるように、Android への配信のために GCM の情報をアピアリーズの管理画面に設定するとき、<span
+	class="bold">「カスタムキー設定」に「title」と「message」を設定しなければ、配信されるプッシュ通知の「タイトル」と「メッセージ」がアプリに届きません。</span><br
+	/><span style="font-size:75%;color:#909090;">※ アピアリーズの「マーケット設定」の「カスタムキー設定」に「title」と「message」を設定するとき、指定する順番や場所にとくに決まりはありません。「title」と「message」という言葉であれば問題ありません。</span>
+</p>
+
+<p class="padleft">
+「カスタムキー設定」には、アプリに届けられるデータのキーとして、最大で５つのカスタムキーが設定できます。
+本プラグインによる配信予約ではそのうち「title」および「message」というキーを使い、アプリにプッシュ通知の内容を届けています。
+</p>
+
+<p class="padleft">
+もしもアプリに <span
+	class="bold">それ以上のデータを届けたい場合、アピアリーズの管理画面にて配信予約いただくと最大５つのカスタムキーを設定できる</span>
+	ようになります。またアピアリーズの管理画面で配信をおこなう場合、<span
+	/>カスタムキーは特に「title」や「message」という言葉である必要はなく、<span
+	/>お好きな名称で設定することができ、設定されたとおりのキーと<span
+	/>それに対応するデータがプッシュ通知の配信時にアプリに届けられます。
+</p>
+
+					</div>
+
+
+				</div>
+				<!-- END OF: Description: important -->
+
+
+
+				<!-- BEGIN: Description: troubles -->
+				<div class="desc">
+					<a name="troubles"><h4>困ったときは</h4></a>
+<p>
+本プラグインをご利用いただく上で、管理画面の操作方法などにご不明な点のあるとき、<span
+	/>あるいは店舗用のアプリ開発についてのご質問等があるとき、<span
+	/>多くの場合、アピアリーズの提供する公式ドキュメントサイトの記事で<span
+	/>解答が見つかることがあります。
+</p>
+<p>
+また、本プラグインをインストールいただいてからときから<span
+	class="marker">日数の経過している場合、API などの技術的な仕様が変更している可能性</span>
+	もございますので、プラグインをアップデートいただくか、最新の情報について<span
+	/>以下のドキュメントサイトでご確認いただくようにお願いいたします。
+</p>
+<p class="padleft"><a href="http://docs.appiaries.com/"
+	target="_blank">アピアリーズ ‐ 公式ドキュメントサイト<br
+	/>http://docs.appiaries.com/</a>
+</p>
+<p>
+それでも問題が解決しない場合、お問い合わせフォームよりお問い合わせください。
+</p>
+<p class="padleft"><a href="https://www.appiaries.com/jp/contact/"
+	target="_blank">アピアリーズ ‐ お問い合わせフォーム<br
+	/>https://www.appiaries.com/jp/contact/</a>
+</p>
+				</div>
+				<!-- END OF: Description: troubles -->
+
+
+
+			</div>
+			<!-- END OF: "box-body" (for "Description") -->
+
+		</div>
+	</div>
+	<!-- END OF: Appiaries Plugin Description -->
+
+	<div class="col-md-3 col-lg-3">
+	</div>
+
+</div>
+{% endblock main %}
+

@@ -1,0 +1,43 @@
+Plugin\Appiaries\Entity\AppiariesDevices:
+    type: entity
+    table: appiaries_devices
+    repositoryClass: Plugin\Appiaries\Repository\AppiariesDevicesRepository
+    id:
+        id:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        customer_id:
+            type: integer
+            nullable: false
+            unsigned: false
+        os:
+            type: smallint
+            nullable: false
+            unsigned: false
+            options:
+                default: '0'
+        device_id:
+            type: string
+            length: 255
+            nullable: false
+        attr:
+            type: text
+            nullable: true
+        created:
+            type: datetime
+            nullable: false
+        updated:
+            type: datetime
+            nullable: false
+    oneToOne:
+        customer:
+            targetEntity: \Eccube\Entity\Customer
+            joinColumn:
+                name: customer_id
+                referencedColumnName: customer_id
+    lifecycleCallbacks: {  }

@@ -1,0 +1,446 @@
+{#
+Appiaries Push Notifications EC-CUBE 3 Plugin v1.0.0
+melissa always loves you!
+Copyright (c) 2015 Appiaries Co.
+Under the terms of the MIT license.
+http://www.appiaries.com/
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#}
+
+{% extends 'default_frame.twig' %}
+
+{% set menus = ['appiaries', 'push_add', ''] %}
+
+{% block title %}プッシュ配信管理{% endblock %}
+{% block sub_title %}配信予約{% endblock %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="{{ app.config.admin_urlpath }}/assets/css/bootstrap-datetimepicker.min.css">
+<style>
+.bold {
+  font-weight: bold;
+}
+.search_subtitle {
+  font-weight: bold;
+  font-size: 130%;
+  padding-left: 0px;
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+.red {
+  color: #df0000;
+}
+.larger {
+  font-size: 120%;
+}
+.note {
+  font-size: 75%;
+  color: #505050;
+  font-weight: normal;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script>
+$('#btn_next_to_add_message').on('click', function(){
+	$('#add_search_form').attr({ action: "{{ url('admin_appiaries_push_add_reserve') }}" }).submit();
+});
+$('.post_with_pager').each(function(){
+	var pg = $(this).attr('data-pg');
+	if (pg) {
+		$(this).off().on('click', (function(){
+			var __pg = pg;
+			return function(){
+				$('#add_search_form')
+					.append(
+						$('<input>')
+							.attr({
+								type: 'hidden',
+								name: 'pg',
+								value: __pg
+							})
+					)
+					.submit();
+			};
+		})());
+	}
+});
+$(document).ready(function(){
+	// Select jobs if jobs are already selected.
+	var json = $('#hidden_jobs').length ? $('#hidden_jobs').html() : null;
+	if (json && $('#appiaries_push_job').length) {
+		var jobs = JSON.parse(json);
+		var size = jobs.length;
+		jobs.map(function(n, i){
+			$('#appiaries_push_job option[value="' + n + '"]').prop('selected', true);
+			if (i + 1 >= size) {
+				json = jobs = size = void 0;
+			}
+		});
+	}
+	var is_form_submitted = {% if os is defined and os != '' %}true{% else %}false{% endif %};
+	if (is_form_submitted) {
+		var __p = $('#search_result_box').offset().top;
+		$('html,body').animate({ scrollTop: (__p - 100) }, 'fast');
+	}
+});
+</script>
+{% endblock javascript %}
+
+{# BEGIN: main #}
+{% block main %}
+
+	{% if jobs_json is defined %}
+	<!-- When jobs are already chosen, then Jquery will select them accordingly. -->
+	<div id="hidden_jobs" style="display:none;">{{ jobs_json }}</div>
+	{% endif %}
+
+<div id="aside_wrap" class="row">
+
+	<!-- BEGIN: Appiaries Push Add Form -->
+	<form id="add_search_form" method="POST"
+		action="{{ url('admin_appiaries_push_add_search') }}" role="form" class="form-horizontal">
+
+	{# This will automatically insert the EC-CUBE session token #}
+	{{ form_widget(add_search_form._token) }}
+
+	<!-- BEGIN: Left Side Content -->
+	<div class="col-md-9">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">配信予約 (1/4) 配信対象の検索</h3>
+				<p>最初に配信の対象となる会員を検索します。</p>
+			</div>
+			<div class="box-body">
+				<div class="form-horizontal">
+
+					<div class="col-md-12 col-lg-12 search_subtitle">
+						会員情報
+					</div>
+
+<!-- OS -->
+					<div class="form-group">
+{{ form_label(add_search_form.os, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-4 col-lg-4 input_name form-inline">
+{{ form_widget(add_search_form.os, { 'value' : os ~ "" }) }}
+<div class="note red" style="margin-top:6px;">配信対象となる OS は必ず指定する必要があります。</div>
+						</div>
+						<div class="col-md-6 col-lg-6">
+{{ form_errors(add_search_form.os) }}
+						</div>
+					</div>
+<!-- PREF -->
+					<div class="form-group">
+{{ form_label(add_search_form.pref, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-4 col-lg-4 input_name form-inline">
+{{ form_widget(add_search_form.pref, { 'value' : pref ~ "" }) }}
+						</div>
+						<div class="col-md-6 col-lg-6">
+{{ form_errors(add_search_form.pref) }}
+						</div>
+					</div>
+<!-- SEX -->
+					<div class="form-group">
+{{ form_label(add_search_form.sex, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-2 col-lg-2 input_name form-inline">
+{{ form_widget(add_search_form.sex, { 'value' : sex ~ "" }) }}
+						</div>
+						<div class="col-md-8 col-lg-8">
+{{ form_errors(add_search_form.sex) }}
+						</div>
+					</div>
+<!-- AGE (min) -->
+					<div class="form-group">
+{{ form_label(add_search_form.age_min, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-2 col-lg-2 input_name form-inline">
+{{ form_widget(add_search_form.age_min, { 'value' : age_min }) }} 歳から
+						</div>
+						<div class="col-md-8 col-lg-8">
+{{ form_errors(add_search_form.age_min) }}
+						</div>
+					</div>
+<!-- AGE (max) -->
+					<div class="form-group">
+{{ form_label(add_search_form.age_max, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-2 col-lg-2 input_name form-inline">
+{{ form_widget(add_search_form.age_max, { 'value' : age_max }) }} 歳まで
+						</div>
+						<div class="col-md-8 col-lg-8">
+{{ form_errors(add_search_form.age_max) }}
+						</div>
+					</div>
+<!-- JOB -->
+					<div class="form-group">
+{{ form_label(add_search_form.job, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-6 col-lg-6 input_name form-inline">
+{{ form_widget(add_search_form.job, { 'value' : job }) }}
+						</div>
+						<div class="col-md-4 col-lg-4">
+{{ form_errors(add_search_form.job) }}
+						</div>
+					</div>
+
+<!-- USER UPDATED (min) -->
+					<div class="form-group">
+{{ form_label(add_search_form.updated_min, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-5 col-lg-5 input_name form-inline">
+{{ form_widget(add_search_form.updated_min) }} から
+						</div>
+						<div class="col-md-5 col-lg-5">
+{{ form_errors(add_search_form.updated_min) }}
+						</div>
+					</div>
+<!-- USER UPDATED (max) -->
+					<div class="form-group">
+{{ form_label(add_search_form.updated_max, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-5 col-lg-5 input_name form-inline">
+{{ form_widget(add_search_form.updated_max) }} まで
+						</div>
+						<div class="col-md-5 col-lg-5">
+{{ form_errors(add_search_form.updated_max) }}
+						</div>
+					</div>
+<!-- USER CREATED (min) -->
+					<div class="form-group">
+{{ form_label(add_search_form.created_min, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-5 col-lg-5 input_name form-inline">
+{{ form_widget(add_search_form.created_min) }} から
+						</div>
+						<div class="col-md-5 col-lg-5">
+{{ form_errors(add_search_form.created_min) }}
+						</div>
+					</div>
+<!-- USER CREATED (max) -->
+					<div class="form-group">
+{{ form_label(add_search_form.created_max, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-5 col-lg-5 input_name form-inline">
+{{ form_widget(add_search_form.created_max) }} まで
+						</div>
+						<div class="col-md-5 col-lg-5">
+{{ form_errors(add_search_form.created_max) }}
+						</div>
+					</div>
+
+
+					<div class="col-md-12 col-lg-12 search_subtitle">
+						購入履歴
+					</div>
+
+<!-- PRODUCT NAME / PRODUCT CODE -->
+					<div class="form-group">
+{{ form_label(add_search_form.product_name, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-9 col-lg-9 input_name form-inline">
+{{ form_widget(add_search_form.product_name, { 'value' : product_name }) }}
+						</div>
+						<div class="col-md-1 col-lg-1">
+{{ form_errors(add_search_form.product_name) }}
+						</div>
+					</div>
+<!-- PURCHASE PRICE (min) -->
+					<div class="form-group">
+{{ form_label(add_search_form.purchase_total_min, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-4 col-lg-4 input_name form-inline">
+{{ form_widget(add_search_form.purchase_total_min, { 'value' : purchase_total_min }) }} 円から
+						</div>
+						<div class="col-md-6 col-lg-6">
+{{ form_errors(add_search_form.purchase_total_min) }}
+						</div>
+					</div>
+<!-- PURCHASE PRICE (max) -->
+					<div class="form-group">
+{{ form_label(add_search_form.purchase_total_max, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-4 col-lg-4 input_name form-inline">
+{{ form_widget(add_search_form.purchase_total_max, { 'value' : purchase_total_max }) }} 円まで
+						</div>
+						<div class="col-md-6 col-lg-6">
+{{ form_errors(add_search_form.purchase_total_max) }}
+						</div>
+					</div>
+<!-- PURCHASE COUNT (min) -->
+					<div class="form-group">
+{{ form_label(add_search_form.purchase_count_min, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-2 col-lg-2 input_name form-inline">
+{{ form_widget(add_search_form.purchase_count_min, { 'value' : purchase_count_min }) }} 回から
+						</div>
+						<div class="col-md-8 col-lg-8">
+{{ form_errors(add_search_form.purchase_count_min) }}
+						</div>
+					</div>
+<!-- PURCHASE COUNT (max) -->
+					<div class="form-group">
+{{ form_label(add_search_form.purchase_count_max, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-2 col-lg-2 input_name form-inline">
+{{ form_widget(add_search_form.purchase_count_max, { 'value' : purchase_count_max }) }} 回まで
+						</div>
+						<div class="col-md-8 col-lg-8">
+{{ form_errors(add_search_form.purchase_count_max) }}
+						</div>
+					</div>
+<!-- LAST PURCHASED (min) -->
+					<div class="form-group">
+{{ form_label(add_search_form.purchase_last_min, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-5 col-lg-5 input_name form-inline">
+{{ form_widget(add_search_form.purchase_last_min) }} から
+						</div>
+						<div class="col-md-5 col-lg-5">
+{{ form_errors(add_search_form.purchase_last_min) }}
+						</div>
+					</div>
+<!-- LAST PURCHASED (max) -->
+					<div class="form-group">
+{{ form_label(add_search_form.purchase_last_max, null, {'label_attr': { 'class': 'col-md-2 col-lg-2 control-label' }}) }}
+						<div class="col-md-5 col-lg-5 input_name form-inline">
+{{ form_widget(add_search_form.purchase_last_max) }} まで
+						</div>
+						<div class="col-md-5 col-lg-5">
+{{ form_errors(add_search_form.purchase_last_max) }}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END OF: Left Side Content -->
+
+
+	<!-- BEGIN: Right Side Content -->
+	<div id="aside_column" class="col-md-3">
+		<div class="col_inner">
+			<div class="box no-header">
+				<div class="box-body">
+					<div class="row text-center">
+<div class="col-sm-6 col-sm-offset-3 col-md-12 col-md-offset-0">
+<input id="btn_submit_add_search" type="submit" class="btn btn-primary btn-block btn-lg" value="検索" />
+</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END OF: Appiaries Settings Form -->
+
+	</form>
+	<!-- END OF: Appiaries Settings Form -->
+</div>
+
+
+<!-- BEGIN: footer -->
+<div id="search_result_box" class="col-md-12 col-lg-12">
+
+
+
+	{# BEGIN: pager #}
+	{% if pager is defined and pager.total is defined and pager.total > 0 %}
+		<div class="box">
+			<div class="box-header with-arrow">
+				<h3 class="box-title">検索結果 <span
+					class="normal"><strong>{{ pager.total }} 件</strong>
+					が該当しました</span></h3>
+		{% if exceeds_push_api_request_max is defined %}
+				<div class="">
+<span class="red"><span class="bold">※※※ 注意 ※※※</span><br />
+この配信予約は一度に予約できる API リクエストの上限である <span
+	class="bold">1000 件</span>
+	を超えているため、<br
+	/><span class="bold">1000 件 ごとに分割されて配信予約されますのでご注意ください。
+</span>
+				</div>
+		{% endif %}
+			</div>
+			<div class="box-body">
+				<div class="table_list">
+					<div class="table-responsive with-border">
+						<table class="table table-striped">
+						<thead>
+							<tr>
+							<th>会員 ID</th>
+							<th>会員名</th>
+							<th>電話番号</th>
+							<th>メールアドレス</th>
+							<th>デバイス ID</th>
+							</tr>
+						</thead>
+						<tbody>
+		{% for d in pager.list %}
+<tr>
+<td>{{ d.customer_id }}</td>
+<td>{{ d.name01 }}&nbsp;{{ d.name02 }}</td>
+<td>{{ d.tel01 }}-{{ d.tel02 }}-{{ d.tel03 }}</td>
+<td>{{ d.email }}</td>
+<td>{{ d.device_id }}</td>
+</tr>
+		{% endfor %}
+</tbody>
+</table>
+					</div>
+				</div>
+			</div>
+
+
+	{# BEGIN: pager #}
+	{% if pager is defined %}
+	<div class="box-footer">
+		<div class="text-center">
+			<ul class="pagination">
+		{% if pager.prev is defined %}
+			<li><a href="javascript:void(0);"
+				data-pg="{{ pager.prev }}"
+				class="post_with_pager"
+				aria-label="Previous"><span aria-hidden="true">前へ</span></a></li>
+		{% endif %}
+
+		{% if pager.all_the_pages is defined %}
+			{% for pg in pager.all_the_pages %}
+			<li{% if pg == pager.current %} class="active"{% endif %}><a
+				href="javascript:void(0);"
+				data-pg="{{ pg }}"
+				class="post_with_pager"><span>{{ pg }}</span></a></li>
+			{% endfor %}
+		{% endif %}
+
+		{% if pager.next is defined %}
+			<li><a href="javascript:void(0);"
+				data-pg="{{ pager.next }}"
+				class="post_with_pager"
+				aria-label="Next"><span aria-hidden="true">次へ</span></a></li>
+		{% endif %}
+			</ul>
+		</div>
+	</div>
+	{% endif %}
+	{# END OF: pager #}
+
+
+			<div class="row col-md-12 col-lg-12" style="padding: 20px 0px 20px;">
+				<div class="col-md-4 col-lg-4"></div>
+				<div class="col-md-4 col-lg-4">
+					<button id="btn_next_to_add_message"
+						class="btn btn-primary btn-block btn-lg">配信内容を作成する</button>
+			        </div>
+				<div class="col-md-4 col-lg-4"></div>
+		        </div>
+		</div>
+	{% elseif os is defined and os != "" %}
+		<div class="box">
+			<div class="box-header with-arrow">
+				<h3 class="box-title">検索条件に該当するデータがありませんでした。</h3>
+			</div>
+		</div>
+	{% endif %}
+	{# END OF: pager #}
+
+</div>
+<!-- END OF: footer -->
+
+
+{% endblock main %}
+{# END OF: main #}
+

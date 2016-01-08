@@ -1,0 +1,174 @@
+{#
+Appiaries Push Notifications EC-CUBE 3 Plugin v1.0.0
+melissa always loves you!
+Copyright (c) 2015 Appiaries Co.
+Under the terms of the MIT license.
+http://www.appiaries.com/
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#}
+
+{% extends 'default_frame.twig' %}
+
+{% set menus = ['appiaries', 'push_list', ''] %}
+
+{% block title %}プッシュ配信管理{% endblock %}
+{% block sub_title %}配信予約一覧{% endblock %}
+
+{% block stylesheet %}
+<style>
+#push_list_table th, #push_list_table td {
+  text-align: center;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script>
+</script>
+{% endblock javascript %}
+
+{# BEGIN: main #}
+{% block main %}
+<div id="aside_wrap">
+	<div class="col-md-9">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">配信予約一覧</h3>
+			</div>
+			<div class="box-body">
+				<p>配信予約の一覧を表示します。</p>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-3">
+	</div>
+</div>
+
+<!-- BEGIN: footer -->
+<div class="col-md-12 col-lg-12">
+
+	{# BEGIN: push_list #}
+	{% if pager is defined and pager.list is defined %}
+		<div class="box">
+			<div class="box-header with-arrow">
+				<h3 class="box-title">配信予約一覧</h3>
+<p>配信日時の近い順に表示しています。</p>
+			</div>
+			<div class="box-body">
+				<div class="table_list">
+					<div class="table-responsive with-border">
+						<table id="push_list_table" class="table table-striped">
+						<thead>
+							<tr>
+							<th>配信日時</th>
+							<th>ID</th>
+							<th>OS</th>
+							<th>対象</th>
+							<th>成功</th>
+							<th>失敗</th>
+							<th>開封</th>
+							<th>配信予約タイトル</th>
+							<th>ステータス</th>
+							<th></th>
+							<th></th>
+							<th></th>
+							</tr>
+						</thead>
+						<tbody>
+		{% for p in pager.list %}
+<tr>
+<td>{% if p.reserve %}{{ p.reserve }}{% endif %}</td>
+<td>{% if p.push_id is defined %}{{ p.push_id }}{% endif %}</td>
+<td>{% if p.type == 'apns' %}iOS{% else %}Android{% endif %}</td>
+<td>{% if p.device_count is defined %}{{ p.device_count|number_format }}{% endif %}</td>
+<td style="color:{% if p.send_ok is defined and p.send_ok > 0 %}#084c96{%
+	else %}#e6e6e6{% endif %};font-weight:bold;">{%
+		if p.send_ok is defined %}{{ p.send_ok|number_format }}{% endif %}</td>
+<td style="color:{% if p.send_error is defined and p.send_error > 0 %}#e00000{%
+	else %}#e6e6e6{% endif %};font-weight:bold;">{%
+		if p.send_error is defined %}{{ p.send_error|number_format }}{% endif %}</td>
+<td style="color:{% if p.count_per_pushid is defined and p.count_per_pushid > 0 %}#deb600{%
+	else %}#e6e6e6{% endif %};font-weight:bold;">{%
+		if p.count_per_pushid is defined %}{{ p.count_per_pushid|number_format }}{% endif %}</td>
+<td>{% if p.title is defined %}{{ p.title |
+		length > 50 ? p.title|slice(0, 50) ~ '...' : p.title  }}{% endif %}</td>
+<td>
+			{% if p.send_status is not defined %}
+<span style="color: #e36868;">処理中</span>
+			{% elseif p.send_status == 0 %}
+<span style="color: #e36868;">未送信</span>
+			{% elseif p.send_status == 1 %}
+<span style="color: #87cb73;">送信中</span>
+			{% elseif p.send_status == 2 %}
+<span style="color: #5073cb;">送信完了</span>
+			{% elseif p.send_status == 3 %}
+<span style="color: #e36868;">再送信待ち</span>
+			{% else %}
+<span style="color: #b42eab">不明</span>
+			{% endif %}
+</td>
+			{% if p.nochange == false and p.send_status is defined and p.send_status == 0 %}
+<td><a href="{{ path('admin_appiaries_push_delete', {'id': p._id ~ "", 'pg' : pg}) }}"
+	class="btn btn-danger btn-block btn-sm">削除</a></td>
+<td><a href="{{ path('admin_appiaries_push_edit', {'id': p._id ~ "", 'pg' : pg}) }}"
+	class="btn btn-warning btn-block btn-sm">編集</a></td>
+			{% else %}
+<td><a href="javascript:void(0);" class="btn btn-default btn-block btn-sm disabled">削除</a></td>
+<td><a href="javascript:void(0);" class="btn btn-default btn-block btn-sm disabled">編集</a></td>
+			{% endif %}
+<td><a href="{{ path('admin_appiaries_push_view', {'id': p._id ~ "", 'pg' : pg}) }}"
+ class="btn btn-primary btn-block btn-sm">詳細</a></td>
+</tr>
+		{% endfor %}
+</tbody>
+</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endif %}
+	{# END OF: push_list #}
+
+
+	{# BEGIN: pager #}
+	{% if pager is defined %}
+	<div class="box-footer">
+		<div class="text-center">
+			<ul class="pagination">
+		{% if pager.prev is defined %}
+			<li><a href="{{ path('admin_appiaries_push_list', {'pg': pager.prev ~ "" }) }}"
+				aria-label="Previous"><span aria-hidden="true">前へ</span></a></li>
+		{% endif %}
+
+		{% if pager.all_the_pages is defined %}
+			{% for pg in pager.all_the_pages %}
+			<li{% if pg == pager.current %} class="active"{% endif %}><a
+				href="{{ path('admin_appiaries_push_list', {'pg': pg ~ "" }) }}"><span>{{ pg }}</span></a></li>
+			{% endfor %}
+		{% endif %}
+
+		{% if pager.next is defined %}
+			<li><a href="{{ path('admin_appiaries_push_list', {'pg': pager.next ~ "" }) }}"
+				aria-label="Next"><span aria-hidden="true">次へ</span></a></li>
+		{% endif %}
+			</ul>
+		</div>
+	</div>
+	{% endif %}
+	{# END OF: pager #}
+
+</div>
+<!-- END OF: footer -->
+
+
+</div>
+{% endblock main %}
+{# END OF: main #}
+

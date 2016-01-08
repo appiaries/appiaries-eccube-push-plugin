@@ -1,0 +1,32 @@
+Plugin\Appiaries\Entity\AppiariesSettings:
+    type: entity
+    table: appiaries_settings
+    repositoryClass: Plugin\Appiaries\Repository\AppiariesSettingsRepository
+    id:
+        id:
+            type: integer
+            nullable: false
+            unsigned: false
+            id: true
+            generator:
+                strategy: NONE
+    fields:
+        datastore_id:
+            type: text
+            length: 20
+            nullable: true
+        app_id:
+            type: text
+            length: 20
+            nullable: true
+        app_token:
+            type: string
+            length: 28
+            nullable: true
+        created:
+            type: datetime
+            nullable: false
+        updated:
+            type: datetime
+            nullable: false
+    lifecycleCallbacks: {  }

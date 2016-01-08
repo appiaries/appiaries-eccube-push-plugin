@@ -1,0 +1,18 @@
+# Event hooks
+
+eccube.event.controller.mypage_login.before:
+    - [on_login_control_before, NORMAL]
+eccube.event.controller.mypage_login.after:
+    - [on_login_control_after, NORMAL]
+
+eccube.event.render.mypage_login.before:
+    - [on_login_render_before, NORMAL]
+eccube.event.render.mypage_login.after:
+    - [on_login_render_after, NORMAL]
+
+
+eccube.event.app.before:
+    - [on_app_before, NORMAL]
+eccube.event.app.after:
+    - [on_app_after, NORMAL]
+

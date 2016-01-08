@@ -1,0 +1,341 @@
+{#
+Appiaries Push Notifications EC-CUBE 3 Plugin v1.0.0
+melissa always loves you!
+Copyright (c) 2015 Appiaries Co.
+Under the terms of the MIT license.
+http://www.appiaries.com/
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#}
+
+{% extends 'default_frame.twig' %}
+
+{% set menus = ['appiaries', 'push_list', ''] %}
+
+{% block title %}プッシュ配信管理{% endblock %}
+{% block sub_title %}配信内容閲覧{% endblock %}
+
+{% block stylesheet %}
+<link rel="stylesheet" href="{{ app.config.admin_urlpath }}/assets/css/bootstrap-datetimepicker.min.css">
+<style>
+.bold {
+  font-weight: bold;
+}
+.larger {
+  font-size: 120%;
+}
+.red {
+  color: #df0000;
+}
+.note {
+  font-size: 75%;
+  color: #505050;
+  font-weight: normal;
+}
+.valign {
+  vertical-align: middle !important;
+}
+</style>
+{% endblock stylesheet %}
+
+{% block javascript %}
+<script>
+$('#btn_back').on('click', function(){ history.back(-1); });
+</script>
+{% endblock javascript %}
+
+{# BEGIN: main #}
+{% block main %}
+
+	{% if data is defined and data.nochange == false
+			and data.send_status is defined
+			and data.send_status == 0 %}
+		{% set allow_change = true %}
+	{% else %}
+		{% set allow_change = false %}
+	{% endif %}
+
+<div id="aside_wrap">
+	<div class="col-md-10 col-lg-10">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">配信内容閲覧</h3>
+			</div>
+			<!-- BEGIN: BOX-BODY -->
+			<div class="box-body">
+				<p>指定された配信予約の内容は以下の通りです。</p>
+
+	{# BEGIN: Reserved Push Data #}
+	{% if data is defined %}
+				<div class="table_list">
+					<div class="table-responsive">
+						<table class="table table-striped with-border">
+						<tbody>
+<tr>
+<th class="col-md-2 col-lg-2 valign">プッシュID</th>
+<td class="col-md-8 col-lg-8 valign">{% if data.push_id is defined %}{{ data.push_id }}{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">配信予約を識別するためのIDです。<a
+		href="http://docs.appiaries.com/?p=1250"
+			target="_blank">「開封登録 API」</a>を利用するときに指定します。
+</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2 valign">送信予約ID</th>
+<td class="col-md-8 col-lg-8 valign">{% if data._id is defined %}{{ data._id }}{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">配信予約を識別するためのIDです。<a
+		href="http://docs.appiaries.com/?p=16118"
+			target="_blank">「予約更新 API」</a>や<a
+		href="http://docs.appiaries.com/?p=16120"
+			target="_blank">「予約削除 API」</a>や<a
+		href="http://docs.appiaries.com/?p=16123"
+			target="_blank">「個別取得 API」</a>などを利用するときに指定します。</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2 valign">配信予約タイトル</th>
+<td class="col-md-8 col-lg-8 valign">{% if data.title is defined %}{{ data.title }}{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">配信予約を管理いただくためのタイトルです。</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2 valign">デバイス種別</th>
+<td class="col-md-8 col-lg-8 valign">{% if data.type is defined %}{%
+		if data.type == 'apns' %}iOS{% else %}Android{% endif %}{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">配信対象となるOSです。</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2 valign">配信日時</th>
+<td class="col-md-8 col-lg-8 valign">{% if data.reserve is defined %}{{ data.reserve }}{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">配信日時として設定された日時です。
+配信サーバの状況により、実際の配信開始／終了が遅延する場合もあります。</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2 valign">配信状況</th>
+<td class="col-md-8 col-lg-8 valign">{% if data.send_status is defined %}{%
+		if data.send_status == 0 %}<span style="color:#e36868;">未送信</span>{%
+		elseif data.send_status == 1 %}<span style="color:#87cb73;">送信中</span>{%
+		elseif data.send_status == 2 %}<span style="color:#5073cb;">送信完了</span>{%
+		elseif data.send_status == 3 %}<span style="color:#e36868;">再送信待ち</span>{%
+		else %}<span style="color:#b42eab">不明</span>{% endif %}{%
+	else %}<span style="color:#e36868;">処理中</span>{% endif %}
+&nbsp; (計 : {% if data.reservecount is defined %}{{data.reservecount|number_format}}{% endif %} 件)
+		<div style="margin-top:4px;margin-left:20px;">
+成功 : <span style="margin-left:10px;">{% if data.send_ok is defined %}{{ data.send_ok|number_format }} 件{% endif %}</span>
+		</div>
+		<div style="margin-top:4px;margin-left:20px;">
+失敗 : <span style="margin-left:10px;">{% if data.send_error is defined %}{{ data.send_error|number_format }} 件{% endif %}</span>
+		</div>
+{% if data.is_success != true and data.errors is defined %}
+		<div style="margin-top:4px;margin-left:30px;color:#a0a0a0;">
+	{% for err in data.errors %}
+<div>{% if err.msg is defined %}{{ err.msg }}{% endif %}{%
+		if err.cnt is defined %}{{ err.cnt|number_format }} : <span
+			style="margin-left:10px;">{{ err.cnt|number_format }} 件</span>{% endif %}</div>
+	{% endfor %}
+		</div>
+{% endif %}
+</td>
+<td class="col-md-2 col-lg-2 note">配信状況として《 <span
+	style="color:#e36868;">未送信</span>・<span
+	style="color:#87cb73;">送信中</span>・<span
+	style="color:#5073cb;">送信完了</span>・<span
+	style="color:#e36868;">再送信待ち</span>・<span
+	style="color:#b42eab">不明</span>・<span
+	style="color:#e36868;">処理中</span> 》のいずれかが表示されます。
+配信失敗時に表示されるエラーコードについては<a href="http://docs.appiaries.com/?p=16290#i-5"
+	target="_blank">「アピアリーズ管理画面の利用方法 &gt; エラーコード対応表」</a>にてご確認下さい。
+</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2 valign">配信対象端末数</th>
+<td class="col-md-8 col-lg-8 valign">{%
+		if data.reservecount is defined %}{{ data.reservecount|number_format }} 件{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">予約時に検索した配信対象の合計です。</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2 valign">開封済み件数</th>
+<td class="col-md-8 col-lg-8 valign">{%
+		if data.count_per_pushid is defined %}{{ data.count_per_pushid|number_format }} 件{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">アプリが「開封通知 API」を実装している場合は、<span
+		/>プッシュ通知が開封されたかどうかその件数がこちらで確認いただけます。<a
+			href="http://docs.appiaries.com/?p=14523"
+				target="_blank">「iOS アプリに実装する方法」</a>と<a
+			href="http://docs.appiaries.com/?p=14178"
+				target="_blank">「Android アプリに実装する方法」</a>とでは異なりますので<span
+		/>ご注意ください。アプリ開発者はこのページの一番上にある<span
+		/>「プッシュ ID」を使って開封通知登録をおこないます。</td>
+</tr>
+
+		{# BEGIN: iOS #}
+		{% if data.type == 'apns' %}
+<tr>
+<th class="col-md-2 col-lg-2 valign">メッセージ</th>
+<td class="col-md-8 col-lg-8 valign">{% if data.apns is defined
+		and data.apns.alert is defined
+		and data.apns.alert.body is defined
+	%}{{ data.apns.alert.body }}{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">APNs では "alert" と呼ばれる、プッシュ通知のメッセージ部です。</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2 valign">バッジ</th>
+<td class="col-md-8 col-lg-8 valign">{% if data.apns is defined
+		and data.apns.badge is defined
+	%}{{ data.apns.badge }}{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">アイコンの右肩に表示される数字です。</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2 valign">サウンド</th>
+<td class="col-md-8 col-lg-8 valign">{% if data.apns is defined
+		and data.apns.sound is defined
+	%}{{ data.apns.sound }}{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">通知時に鳴らすサウンドの端末におけるローカルパスです。</td>
+</tr>
+				{% if data.apns.custom is defined%}
+					{% for key,value in data.apns.custom %}
+						{% if key == "title" %}{%
+								set key2 = "タイトル" %}{%
+							elseif key == "message" %}{%
+								set key2 = "メッセージ" %}{%
+							else %}{%
+								set key2 = key %}{% endif %}
+<tr>
+<th class="col-md-2 col-lg-2 valign">{{ key2 }}</th>
+<td class="col-md-8 col-lg-8 valign">{{ value|nl2br }}</td>
+<td class="col-md-2 col-lg-2 note">アプリ側では <span
+	class="bold larger">"{{ key }}"</span> というキーワードで受け取ります。</td>
+</tr>
+					{% endfor %}
+				{% endif %}
+		{% endif %}
+		{# END OF: iOS #}
+
+		{# BEGIN: Android #}
+		{% if data.type == 'gcm' %}
+<!--
+<tr>
+<th class="col-md-2 col-lg-2 valign">delay_while_idle</th>
+<td class="col-md-8 col-lg-8 valign">{% if data.delay_while_idle is defined %}{%
+	if data.delay_while_idle == true %}true{% else %}false{% endif %}{% endif %}</td>
+<th class="col-md-2 col-lg-2 note"></td>
+</tr>
+-->
+				{% if data.custom is defined%}
+					{% for key,value in data.custom %}
+						{% if key == "title" %}{%
+								set key2 = "タイトル" %}{%
+							elseif key == "message" %}{%
+								set key2 = "メッセージ" %}{%
+							else %}{%
+								set key2 = key %}{% endif %}
+<tr>
+<th class="col-md-2 col-lg-2 valign">{{ key2 }}</th>
+<td class="col-md-8 col-lg-8 valign">{{ value|nl2br }}</td>
+<td class="col-md-2 col-lg-2 note">アプリ側では <span
+	class="bold larger">"{{ key }}"</span> というキーワードで受け取ります。</td>
+</tr>
+					{% endfor %}
+				{% endif %}
+
+		{% endif %}
+		{# END OF: Android #}
+
+<tr>
+<th class="col-md-2 col-lg-2 valign">リッチプッシュURL</th>
+<td class="col-md-8 col-lg-8 valign">{%
+	if data._openUrl is defined %}{{ data._openUrl }}{% endif %}</td>
+<td class="col-md-2 col-lg-2 note">通知から特定のウェブサイトにアクセスするためのURLです。</td>
+</tr>
+
+						</tbody>
+						</table>
+					</div>
+				</div>
+
+<p>各項目については、アピアリーズの管理画面の説明が参考になります。</p>
+<p style="margin-left:1em;">
+<a href="http://docs.appiaries.com/?p=16290#B"
+	target="_blank">アピアリーズ管理画面の利用方法 &gt; 予約詳細について</a>
+</p>
+<p>詳しい内容を知りたい場合は下記ドキュメントをご確認ください。</p>
+<p style="margin-left:1em;"><a
+	href="http://docs.appiaries.com/?p=16123#i-4"
+		target="_blank">通知結果個別取得 API - 返却値一覧</a>
+</p>
+
+	{% endif %}
+	{# END OF: Reserved Push Data #}
+
+			</div>
+			<!-- END OF: BOX-BODY -->
+		</div>
+		<!-- END OF: BOX -->
+
+	</div>
+	<div class="col-md-2 col-lg-2">
+	</div>
+</div>
+
+
+<!-- BEGIN: footer -->
+<div class="col-md-12 col-lg-12">
+	<div class="box">
+		<div class="row col-md-12 col-lg-12" style="padding: 20px 0px 20px;">
+	{% if allow_change == true %}
+			<div class="col-md-2 col-lg-2">
+			</div>
+		{% if pg is defined %}
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_list', {'pg' : pg}) }}"
+					class="btn btn-primary btn-block btn-lg">一覧に戻る</a>
+			</div>
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_edit', {'id': data._id ~ "", 'pg' : pg }) }}"
+					class="btn btn-warning btn-block btn-lg">変更する</a>
+			</div>
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_delete', {'id': data._id ~ "", 'pg' : pg }) }}"
+					class="btn btn-danger btn-block btn-lg">削除する</a>
+			</div>
+		{% else %}
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_list') }}"
+					class="btn btn-primary btn-block btn-lg">一覧に戻る</a>
+			</div>
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_edit', {'id': data._id ~ ""}) }}"
+					class="btn btn-warning btn-block btn-lg">変更する</a>
+			</div>
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_delete', {'id': data._id ~ ""}) }}"
+					class="btn btn-danger btn-block btn-lg">削除する</a>
+			</div>
+		{% endif %}
+			<div class="col-md-4 col-lg-4">
+			</div>
+	{% else %}
+			<div class="col-md-4 col-lg-4">
+			</div>
+			<div class="col-md-2 col-lg-2">
+		{% if pg is defined %}
+				<a href="{{ path('admin_appiaries_push_list', {'pg' : pg}) }}"
+					class="btn btn-primary btn-block btn-lg">一覧に戻る</a>
+		{% else %}
+				<button id="btn_back"
+					class="btn btn-primary btn-block btn-lg">一覧に戻る</button>
+		{% endif %}
+			</div>
+			<div class="col-md-6 col-lg-6">
+			</div>
+	{% endif %}
+		</div>
+	</div>
+</div>
+<!-- END OF: footer -->
+
+{% endblock main %}
+{# END OF: main #}
+

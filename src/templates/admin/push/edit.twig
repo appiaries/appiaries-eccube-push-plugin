@@ -1,0 +1,445 @@
+{#
+Appiaries Push Notifications EC-CUBE 3 Plugin v1.0.0
+melissa always loves you!
+Copyright (c) 2015 Appiaries Co.
+Under the terms of the MIT license.
+http://www.appiaries.com/
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#}
+
+{% extends 'default_frame.twig' %}
+
+{% set menus = ['appiaries', 'push_list', ''] %}
+
+{% block title %}プッシュ配信管理{% endblock %}
+{% block sub_title %}配信内容編集{% endblock %}
+
+{% block javascript %}
+<script src="{{ app.config.admin_urlpath }}/assets/js/vendor/moment.min.js"></script>
+<script src="{{ app.config.admin_urlpath }}/assets/js/vendor/moment-ja.js"></script>
+<script src="{{ app.config.admin_urlpath }}/assets/js/vendor/bootstrap-datetimepicker.min.js"></script>
+<script>
+$('#btn_back').on('click', function(){ history.back(-1); });
+$('#appiaries_push_delivery_date').datetimepicker({
+	locale: 'ja',
+	format: 'YYYY-MM-DD HH:mm',
+	useCurrent: false,
+	showTodayButton: true
+});
+$(document).ready(function(){
+	var delivery_default = $('#hidden_delivery_default').length ? $('#hidden_delivery_default').html() : null;
+	if (delivery_default && $('#appiaries_push_delivery_date').length) {
+		$('#appiaries_push_delivery_date').val(delivery_default);
+		delivery_default = void 0;
+	}
+});
+</script>
+{% endblock javascript %}
+
+{# BEGIN: main #}
+{% block main %}
+
+	{% if delivery_date_default is defined %}
+<div id="hidden_delivery_default" style="display:none;">{{ delivery_date_default }}</div>
+	{% endif %}
+
+	{% if data is defined and data.nochange == false
+			and data.send_status is defined
+			and data.send_status == 0 %}
+		{% set allow_change = true %}
+	{% else %}
+		{% set allow_change = false %}
+	{% endif %}
+
+	{% if allow_change == true and mode is defined %}
+<form id="edit_push_form" method="POST"
+	action="{{ path('admin_appiaries_push_edit', {'id': data._id ~ "" }) }}"
+	role="form" class="form-horizontal">
+{{ form_widget(edit_push_form._token) }}
+{{ form_widget(edit_push_form.mode, {'value' : mode ~ "", 'attr': { 'type': 'hidden' }}) }}
+		{% if data.type is defined %}
+<input type="hidden" name="appiaries_push[os]" value="{% if
+	data.type == 'apns' %}ios{% else %}android{% endif %}" />
+		{% endif %}
+		{% if pg is defined %}
+<input type="hidden" name="pg" value="{{ pg }}">
+		{% endif %}
+	{% endif %}
+
+<div id="aside_wrap">
+
+	<div class="col-md-10 col-lg-10">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">配信内容編集{%
+					if success is defined %} (編集完了){%
+					elseif error is defined %} (エラー){%
+					endif %}</h3>
+			</div>
+			<!-- BEGIN: BOX-BODY -->
+			<div class="box-body">
+	{% if allow_change == true%}
+				<p>未送信の予約配信の内容を変更いただけます。</p>
+	{% else %}
+				<p>この予約配信は内容を変更いただくことはできません。</p>
+	{% endif %}
+
+	{# BEGIN: Reserved Push Data #}
+	{% if data is defined %}
+				<div class="table_list">
+					<div class="table-responsive">
+						<table class="table table-striped with-border">
+						<tbody>
+<tr>
+<th class="col-md-2 col-lg-2">プッシュID</th>
+<td class="col-md-10 col-lg-10">{% if data.push_id is defined %}{{ data.push_id }}{% endif %}</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2">送信予約ID</th>
+<td class="col-md-10 col-lg-10">{% if data._id is defined %}{{ data._id }}{% endif %}</td>
+</tr>
+
+		{% if push_reserve_title is defined %}
+<tr>
+<th class="col-md-2 col-lg-2">予約配信タイトル</th>
+			{% if success is defined or allow_change == false %}
+<td class="col-md-10 col-lg-10">{{ push_reserve_title }}</td>
+			{% else %}
+<td class="col-md-10 col-lg-10">
+	<div class="form-group">
+		<div class="col-md-5 col-lg-5">
+			{{ form_widget(edit_push_form.push_reserve_title, {
+					'value' : push_reserve_title,
+					'attr' : { 'style' : 'width:100%;' }
+				}) }}
+		</div>
+		<div class="col-md-4 col-lg-4">
+			{{ form_errors(edit_push_form.push_reserve_title) }}
+		</div>
+	</div>
+</td>
+			{% endif %}
+</tr>
+		{% endif %}
+
+<tr>
+<th class="col-md-2 col-lg-2">デバイス種別</th>
+<td class="col-md-10 col-lg-10">{% if data.type is defined %}{%
+		if data.type == 'apns' %}iOS{% else %}Android{% endif %}{% endif %}</td>
+</tr>
+
+		{% if delivery_date_default is defined %}
+<tr>
+<th class="col-md-2 col-lg-2">配信日時</th>
+			{% if success is defined or allow_change == false %}
+<td class="col-md-10 col-lg-10">{% if data.reserve is defined %}{{ data.reserve }}{%
+	else %}{{ delivery_date_default }}{% endif %}</td>
+			{% else %}
+<td class="col-md-10 col-lg-10">
+	<div class="form-group">
+		<div class="col-md-5 col-lg-5">
+			{{ form_widget(edit_push_form.delivery_date, {'value' : delivery_date_default }) }}
+		</div>
+		<div class="col-md-4 col-lg-4">
+			{{ form_errors(edit_push_form.delivery_date) }}
+		</div>
+	</div>
+</td>
+			{% endif %}
+</tr>
+		{% endif %}
+
+<tr>
+<th class="col-md-2 col-lg-2">配信状況</th>
+<td class="col-md-10 col-lg-10">{%
+	if data.send_status is defined %}{%
+		if data.send_status == 0 %}<span style="color:#e36868;">未送信</span>{%
+		elseif data.send_status == 1 %}<span style="color:#87cb73;">送信中</span>{%
+		elseif data.send_status == 2 %}<span style="color:#5073cb;">送信完了</span>{%
+		elseif data.send_status == 3 %}<span style="color:#e36868;">再送信待ち</span>{%
+		else %}<span style="color:#b42eab">不明</span>{% endif %}{%
+	else %}<span style="color:#e36868;">処理中</span>{%
+	endif %}&nbsp; (計 : {%
+		if data.reservecount is defined %}{{ data.reservecount|number_format }}{% endif %} 件)
+		<div style="margin-top:4px;margin-left:20px;">
+			成功 : <span style="margin-left:10px;">{%
+				if data.send_ok is defined %}{{ data.send_ok|number_format }} 件{% endif %}</span>
+		</div>
+		<div style="margin-top:4px;margin-left:20px;">
+		失敗 : <span style="margin-left:10px;">{% if
+			data.send_error %}{{ data.send_error|number_format }} 件{% endif %}</span>
+		</div>
+		{% if data.is_success != true and data.errors is defined %}
+		<div style="margin-top:4px;margin-left:30px;color:#a0a0a0;">
+			{% for err in data.errors %}
+			<div>{% if err.msg is defined %}{{ err.msg }}{% endif %}{%
+				if err.cnt is defined %}{{ err.cnt|number_format }} : <span
+					style="margin-left:10px;">{{ err.cnt|number_format }} 件</span>{% endif %}</div>
+			{% endfor %}
+		</div>
+		{% endif %}
+</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2">配信対象端末数</th>
+<td class="col-md-10 col-lg-10">{% if
+	data.reservecount is defined %}{{ data.reservecount|number_format }} 件{% endif %}</td>
+</tr>
+<tr>
+<th class="col-md-2 col-lg-2">開封済み件数</th>
+<td class="col-md-10 col-lg-10">{%
+		if data.count_per_pushid is defined %}{{ data.count_per_pushid|number_format }} 件{% endif %}</td>
+</tr>
+
+		{% if data.type == 'gcm' and title is defined%}
+			{% if title is defined%}
+<tr>
+<th class="col-md-2 col-lg-2">タイトル</th>
+				{% if success is defined or allow_change == false %}
+<td class="col-md-10 col-lg-10">{{ title }}</td>
+				{% else %}
+<td class="col-md-10 col-lg-10">
+	<div class="form-group">
+		<div class="col-md-5 col-lg-5">
+			{{ form_widget(edit_push_form.title, {
+					'value' : title,
+					'attr' : { 'style' : 'width:100%;' }
+				}) }}
+		</div>
+		<div class="col-md-4 col-lg-4">
+			{{ form_errors(edit_push_form.title) }}
+		</div>
+	</div>
+</td>
+				{% endif %}
+			{% endif %}
+</tr>
+		{% endif %}
+		{# END OF: Title for Android #}
+
+
+		{% if data.type == 'apns' %}
+
+
+<!-- SOUND -->
+<tr>
+<th class="col-md-2 col-lg-2">サウンド</th>
+		{% if success is defined or allow_change == false %}
+<td class="col-md-10 col-lg-10">{{ sound }}</td>
+		{% else %}
+<td class="col-md-10 col-lg-10">
+	<div class="form-group">
+			{% if sound is defined %}
+		<div class="col-md-5 col-lg-5">
+			{{ form_widget(edit_push_form.sound, {
+					'value' : sound ~ "",
+					'attr' : { 'style' : 'width:100%;' }
+				}) }}
+			{% else %}
+			{{ form_widget(edit_push_form.sound, {
+					'attr' : { 'style' : 'width:100%;' }
+				}) }}
+			{% endif %}
+		</div>
+		<div class="col-md-4 col-lg-4">
+			{{ form_errors(edit_push_form.sound) }}
+		</div>
+	</div>
+</td>
+		{% endif %}
+</tr>
+
+<!-- BADGE -->
+
+<tr>
+<th class="col-md-2 col-lg-2">バッジ</th>
+			{% if success is defined or allow_change == false %}
+<td class="col-md-10 col-lg-10">{{ badge }}</td>
+			{% else %}
+<td class="col-md-10 col-lg-10">
+	<div class="form-group">
+		<div class="col-md-5 col-lg-5">
+				{% if badge is defined %}
+					{{ form_widget(edit_push_form.badge, {
+							'value' : badge ~ "",
+							'attr' : { 'style' : 'width:100%;' }
+						}) }}
+				{% else %}
+					{{ form_widget(edit_push_form.badge, {
+							'attr' : { 'style' : 'width:100%;' }
+						}) }}
+				{% endif %}
+		</div>
+		<div class="col-md-4 col-lg-4">
+			{{ form_errors(edit_push_form.badge) }}
+		</div>
+	</div>
+</td>
+			{% endif %}
+</tr>
+
+
+		{% endif %}
+		{# END OF: iOS #}
+
+		{% if message is defined%}
+<tr>
+<th class="col-md-2 col-lg-2">メッセージ</th>
+			{% if success is defined or allow_change == false %}
+<td class="col-md-10 col-lg-10">{{ message|nl2br }}</td>
+			{% else %}
+<td class="col-md-10 col-lg-10">
+	<div class="form-group">
+		<div class="col-md-7 col-lg-7 input_name form-inline">
+			{{ form_widget(edit_push_form.message, {
+				'value' : message,
+				'attr': { 'rows': 8, 'cols': 50 }
+			}) }}
+		</div>
+		<div class="col-md-3 col-lg-3">
+			{{ form_errors(edit_push_form.message) }}
+		</div>
+	</div>
+</td>
+			{% endif %}
+</tr>
+		{% endif %}
+
+		
+<tr>
+<th class="col-md-2 col-lg-2">リッチプッシュ URL</th>
+		{% if success is defined or allow_change == false %}
+<td class="col-md-10 col-lg-10">{{ rich_push }}</td>
+		{% else %}
+<td class="col-md-10 col-lg-10">
+	<div class="form-group">
+		<div class="col-md-5 col-lg-5">
+			{% if rich_push is defined %}
+				{{ form_widget(edit_push_form.rich_push, {
+						'value' : rich_push ~ "",
+						'attr' : { 'style' : 'width:100%;' }
+					}) }}
+			{% else %}
+				{{ form_widget(edit_push_form.rich_push, {
+						'attr' : { 'style' : 'width:100%;' }
+					}) }}
+			{% endif %}
+		</div>
+		<div class="col-md-4 col-lg-4">
+			{{ form_errors(edit_push_form.rich_push) }}
+		</div>
+	</div>
+</td>
+		{% endif %}
+</tr>
+
+
+						</tbody>
+						</table>
+					</div>
+				</div>
+	{% endif %}
+	{# END OF: Reserved Push Data #}
+
+			</div>
+			<!-- END OF: BOX-BODY -->
+		</div>
+		<!-- END OF: BOX -->
+
+	</div>
+	<div class="col-md-2 col-lg-2">
+	</div>
+</div>
+
+
+<!-- BEGIN: footer -->
+<div class="col-md-12 col-lg-12">
+	<div class="box">
+		<div class="row col-md-12 col-lg-12" style="padding: 20px 0px 20px;">
+	{% if allow_change == true %}
+			<div class="col-md-2 col-lg-2"></div>
+		{% if pg is defined %}
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_list', {'pg' : pg}) }}"
+					class="btn btn-primary btn-block btn-lg">一覧に戻る</a>
+			</div>
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_view', {'id' : _id, 'pg' : pg}) }}"
+					class="btn btn-primary btn-block btn-lg">{%
+						if success is defined %}詳細をみる{% else %}詳細に戻る{% endif %}</a>
+			</div>
+			<div class="col-md-2 col-lg-2">
+			{% if success is defined %}
+				<a href="{{ path('admin_appiaries_push_edit', {'id' : _id, 'pg' : pg}) }}"
+					class="btn btn-warning btn-block btn-lg">再変更する</a>
+			{% else %}
+				<input type="submit" class="btn btn-warning btn-block btn-lg" value="これで確定する" />
+			{% endif %}
+			</div>
+		{% else %}
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_list') }}"
+					class="btn btn-primary btn-block btn-lg">一覧に戻る</a>
+			</div>
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_view', {'id' : _id}) }}"
+					class="btn btn-primary btn-block btn-lg">{%
+						if success is defined %}詳細をみる{% else %}詳細に戻る{% endif %}</a>
+			</div>
+			<div class="col-md-2 col-lg-2">
+			{% if success is defined %}
+				<a href="{{ path('admin_appiaries_push_edit', {'id' : _id}) }}"
+					class="btn btn-warning btn-block btn-lg">再編集する</a>
+			{% else %}
+				<input type="submit" class="btn btn-warning btn-block btn-lg" value="これで確定する" />
+			{% endif %}
+			</div>
+		{% endif %}
+			<div class="col-md-4 col-lg-4">
+			</div>
+	{% else %}
+			<div class="col-md-3 col-lg-3">
+			</div>
+		{% if pg is defined %}
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_list', {'pg' : pg}) }}"
+					class="btn btn-primary btn-block btn-lg">一覧に戻る</a>
+			</div>
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_view', {'id' : _id, 'pg' : pg}) }}"
+					class="btn btn-primary btn-block btn-lg">詳細をみる</a>
+			</div>
+		{% else %}
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_list') }}"
+					class="btn btn-primary btn-block btn-lg">一覧に戻る</a>
+			</div>
+			<div class="col-md-2 col-lg-2">
+				<a href="{{ path('admin_appiaries_push_view', {'id' : _id}) }}"
+					class="btn btn-primary btn-block btn-lg">詳細をみる</a>
+			</div>
+		{% endif %}
+			<div class="col-md-5 col-lg-5">
+			</div>
+	{% endif %}
+		</div>
+	</div>
+</div>
+<!-- END OF: footer -->
+
+
+	{% if allow_change == true and mode is defined %}
+</form>
+	{% endif %}
+
+
+{% endblock main %}
+{# END OF: main #}
+
