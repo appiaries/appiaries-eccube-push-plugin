@@ -1,5 +1,5 @@
 {#
-Appiaries Push Notifications EC-CUBE 3 Plugin v1.0.0
+Appiaries Push Notifications EC-CUBE 3 Plugin v1.0.1
 melissa always loves you!
 Copyright (c) 2015 Appiaries Co.
 Under the terms of the MIT license.
@@ -843,89 +843,21 @@ http://docs.appiaries.com/?p=15866</a>
 				<!-- BEGIN: Description: push_app -->
 				<div class="desc">
 					<a name="push_app"><h4>アプリを開発する</h4></a>
-
 <p>
-アプリの開発については、アピアリーズの公式ドキュメントサイトから<br
-	/>プッシュ通知受信のためのブランクプロジェクトがダウンロードいただけます。<br
-	/>こちらをカスタマイズすることで店舗用のアプリが比較的容易に開発できるはずです。
+GitHub で <span class="marker">プッシュ通知を受信するサンプルアプリを公開</span>
+	していますので、このサンプルを雛形としてご利用いただくことにより、<span
+	/>アプリ開発が比較的容易になるはずです。
 </p>
 
-<p class="bold large">アプリの開発</p>
-
-<p class="padleft">
-<a href="http://docs.appiaries.com/?p=14416"
-		target="_blank">iOS 用プッシュ通知受信サンプルアプリ<br
-	/>http://docs.appiaries.com/?p=14416</a><br
-	/>ページ内の「ブランク・プロジェクト」より以下の二つを選択いただけます。<br
-	/>通常は <span class="green">ObjCBlankPushApp-2_0_7.zip</span> をご利用ください。<br
-	/>CocoaPods を利用されている方は <span
-		class="green">ObjCPodsBlankPushApp-2_0_7.zip</span> をご利用ください。
+<p class="padleft"><a href="https://github.com/EC-CUBE/eccube-iOS"
+	target="_blank">EC-CUBE サンプルアプリ (iOS)<br
+	/>https://github.com/EC-CUBE/eccube-iOS</a>
 </p>
 
-<p class="padleft">
-<a href="http://docs.appiaries.com/?p=14066"
-		target="_blank">Android 用プッシュ通知受信サンプルアプリ<br
-	/>http://docs.appiaries.com/?p=14066</a><br
-	/>ページ内の「ブランク・プロジェクト」より以下の二つを選択いただけます。<br
-	/>Android Studio の場合は <span
-		class="green">androidstudio-BlankPushApp-2_0_10.zip</span> をご利用ください。<br
-	/>Eclipse の場合は <span
-		class="green">adt-BlankPushApp-2_0_10.zip</span> をご利用ください。
+<p class="padleft"><a href="https://github.com/EC-CUBE/eccube-Android"
+	target="_blank">EC-CUBE サンプルアプリ (Android)<br
+	/>https://github.com/EC-CUBE/eccube-Android</a>
 </p>
-
-<p class="bold large">プラグインとの連携</p>
-
-<p>
-上記サンプルアプリによってプッシュを受信することができるようになりますが、<br
-	/>Appiaries プッシュ通知プラグインと連携するための実装が必要となります。<br
-	/>サンプルアプリは APNs または GCM からデバイス ID を取得するための<br
-	/>コードが記述されていますが、このとき、取得したデバイス ID を<br
-	/>Appiaries プッシュ通知プラグインに登録しなければなりません。
-</p>
-
-<p>
-ユーザ毎に異なるデバイス ID は、ユーザが店舗にログインするときに<br
-	/>プラグイン側に渡す必要があります。<br
-	/>具体的には、WebView に表示される店舗のウェブサイトのページのうち、<br
-	/>/mypage/login のページに表示されるフォームに新しく二つの<br
-	/>入力フォームが追加されるようにします。
-</p>
-
-<p class="padleft bold">
-(a) デバイス ID を hidden 入力フォームとして埋め込む
-</p>
-
-<p class="padleft">
-一つ目の hidden フォームは「デバイス ID」です。
-アプリが取得した「デバイス ID」は、以下のように hidden の
-入力フォームとしてウェブサイトのページに埋め込むようにして下さい。
-</p>
-
-<p class="padleft">
-<font color="green">&lt;input type="hidden" name="login_device_id" value="(デバイス ID)" /&gt;</font>
-</p>
-
-<p class="padleft bold">
-(b) OS 種別を hidden 入力フォームとして埋め込む
-</p>
-
-<p class="padleft">
-二つ目の hidden フォームは「OS 種別」です。
-iOS アプリの場合は固定で以下を埋め込んでください。
-</p>
-
-<p class="padleft">
-<font color="green">&lt;input type="hidden" name="login_os" value="ios" /&gt;</font>
-</p>
-
-<p class="padleft">
-Android アプリの場合は固定で以下を埋め込んでください。
-</p>
-
-<p class="padleft">
-<font color="green">&lt;input type="hidden" name="login_os" value="android" /&gt;</font>
-</p>
-
 
 				</div>
 				<!-- END OF: Description: push_app -->

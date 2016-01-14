@@ -17,6 +17,9 @@ EC-Cube 3.0 Plugin to deliver Push Notifications to EC-Cube shop customers.
 EC-Cube による店舗の利用者に、簡単にプッシュ通知を配信できる EC-Cube プラグインです。  
 EC-Cube Ver.3.0 系に対応しています。
 
+EC-CUBE Appiaries プッシュ配信プラグイン  
+https://www.ec-cube.net/products/detail.php?product_id=1030
+
 ## History
 
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Appiaries Push Notifications EC-CUBE 3 Plugin v1.0.0
+ * Appiaries Push Notifications EC-CUBE 3 Plugin v1.0.1
  * melissa always loves you!
  * Copyright (c) 2015 Appiaries Co.
  * Under the terms of the MIT license.
@@ -718,6 +718,7 @@ class AppiariesAdminPushController
                     $delta = $cnt - self::PUSH_API_REQUEST_MAX;
                     if ($delta < 0) { $delta = 0; }
                     if ($delta > 0) {
+                        // doraemon
                         $data['exceeds_push_api_request_max'] = $delta;
                     }
                 }
@@ -1159,6 +1160,8 @@ class AppiariesAdminPushController
             while ($beg < $total && $end < $total) {
                 // 9,000,000 deliveries are pretty silly.
                 if ($err || $cnt >= 9000 || $beg > ($total - 1)) {
+                // doraemon
+                // if ($err || $cnt >= 5) {
                     $done = true;
                     if (!$err) { $err = 'recursive_push_request_error'; }
                     break;
@@ -1235,7 +1238,9 @@ class AppiariesAdminPushController
             $hash = array();
             $platform = ($data['os'] == 'ios') ? 'apns' : 'gcm';
             if ($act == 'add') {
+                // doraemon
                 $hash['devices'] = $device_list;
+                // $hash['device_search_conditions'] = 'ALL';
             }
             if ($platform == 'apns') {
                 $hash['alert'] = array('body' => $data['message']);
